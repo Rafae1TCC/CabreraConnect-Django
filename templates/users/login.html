@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}Login - Cabrera Connect{% endblock title %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock css %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Login Visual Side -->
+        <div class="login-visual">
+            <div class="visual-content">
+                <div class="visual-icon">🔐</div>
+                <h2 class="visual-title">Welcome Back</h2>
+                <p class="visual-subtitle">
+                    Access the <span class="visual-highlight">secure dashboard</span> to manage and create invoices for our clients.
+                </p>
+            </div>
+        </div>
+
+        <!-- Login Form Side -->
+        <div class="login-form-container">
+            <div class="login-header">
+                <h1 class="login-title">Sign In</h1>
+                <p class="login-subtitle">Enter your credentials to access your account</p>
+            </div>
+
+            <!-- Alert Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-error">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="login-form" id="loginForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        Username
+                    </label>
+                    {{ form.username.as_widget }}
+                    {% if form.username.errors %}
+                        <div class="alert alert-error">
+                            {% for error in form.username.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">
+                        Password
+                    </label>
+                    {{ form.password.as_widget }}
+                    {% if form.password.errors %}
+                        <div class="alert alert-error">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-options">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="remember" name="remember" class="form-checkbox">
+                        <label for="remember" class="checkbox-label">Remember me</label>
+                    </div>
+                    <a href="{% url 'password_reset' %}" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-button" id="loginButton">
+                    <span>Sign In</span>
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced form interaction
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    const button = document.getElementById('loginButton');
+    const inputs = form.querySelectorAll('input[type="text"], input[type="password"], input[type="email"]');
+
+    // Add form input styling
+    inputs.forEach(input => {
+        input.classList.add('form-input');
+        
+        // Add placeholder if not present
+        if (!input.placeholder) {
+            const label = form.querySelector(`label[for="${input.id}"]`);
+            if (label) {
+                input.placeholder = `Enter your ${label.textContent.toLowerCase()}`;
+            }
+        }
+    });
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+        button.classList.add('loading');
+        button.disabled = true;
+        
+        // Remove loading state after a timeout (in case of errors)
+        setTimeout(() => {
+            button.classList.remove('loading');
+            button.disabled = false;
+        }, 5000);
+    });
+
+    // Enhanced input focus effects
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('focused');
+        });
+    });
+
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+
+// Mobile navigation toggle (inherited from base template)
+document.addEventListener('DOMContentLoaded', function() {
+    const navToggle = document.getElementById('navToggle');
+    const navMenu = document.getElementById('navMenu');
+    
+    if (navToggle && navMenu) {
+        navToggle.addEventListener('click', function() {
+            navToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+    }
+});
+</script>
+{% endblock content %}

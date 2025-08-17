@@ -1,0 +1,39 @@
+{% extends 'inv-base.html' %}
+{% load static %}
+
+{% block title %}Invoice List - Cabrera Connect{% endblock %}
+
+{% block content %}
+<div>
+
+    <h1>Invoice List</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Client</th>
+                <th>Seller</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices %}
+            <tr>
+                <td>{{ invoice.id }}</td>
+                <td>{{ invoice.title }}</td>
+                <td>{{ invoice.date }}</td>
+                <td>{{ invoice.total }}</td>
+                <td>{{ invoice.clt_name }}</td>
+                <td>{{ invoice.sell_name }}</td>
+                <td>
+                    <a href="{% url 'inv_edit' invoice.id %}" class="btn btn-secondary">Edit</a>
+                    <a href="{% url 'inv_edit' invoice.id %}" class="btn btn-secondary">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+</div>
+{% endblock %}
