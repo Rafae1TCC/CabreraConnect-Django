@@ -3,37 +3,107 @@
 
 {% block title %}Invoice List - Cabrera Connect{% endblock %}
 
-{% block content %}
-<div>
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/invoice-styles.css' %}">
+{% endblock %}
 
-    <h1>Invoice List</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Client</th>
-                <th>Seller</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for invoice in invoices %}
-            <tr>
-                <td>{{ invoice.id }}</td>
-                <td>{{ invoice.title }}</td>
-                <td>{{ invoice.date }}</td>
-                <td>{{ invoice.total }}</td>
-                <td>{{ invoice.clt_name }}</td>
-                <td>{{ invoice.sell_name }}</td>
-                <td>
-                    <a href="{% url 'inv_edit' invoice.id %}" class="btn btn-secondary">Edit</a>
-                    <a href="{% url 'inv_edit' invoice.id %}" class="btn btn-secondary">Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Invoice Management</h1>
+            <p class="page-subtitle">Manage and track all your invoices</p>
+        </div>
+        <div>
+            <a href="{% url 'inv_crt' %}" class="btn btn-primary">
+                Create New Invoice
+            </a>
+        </div>
+    </div>
+
+    <!-- Invoices Table -->
+    {% if invoices %}
+    <div class="invoice-table-container">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Client</th>
+                        <th>Seller</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr class="fade-in">
+                        <td>
+                            <span class="badge badge-info">#{{ invoice.id }}</span>
+                        </td>
+                        <td>
+                            <strong>{{ invoice.title }}</strong>
+                        </td>
+                        <td>{{ invoice.date|date:"M d, Y" }}</td>
+                        <td>
+                            <strong>${{ invoice.total|floatformat:2 }}</strong>
+                        </td>
+                        <td>{{ invoice.clt_name }}</td>
+                        <td>{{ invoice.sell_name }}</td>
+                        <td>
+                            <div class="btn-actions">
+                                <a href="{% url 'inv_edit' invoice.id %}" 
+                                   class="btn btn-secondary btn-sm" 
+                                   title="Edit Invoice">
+                                    Edit
+                                </a>
+                                <a href="{% url 'inv_delete' invoice.id %}" 
+                                   class="btn btn-danger btn-sm" 
+                                   title="Delete Invoice">
+                                    Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="form-section">
+        <div class="empty-state">
+            <h3>No Invoices Found</h3>
+            <p>You haven't created any invoices yet. Get started by creating your first invoice!</p>
+            <a href="{% url 'inv_crt' %}" class="btn btn-primary">
+                Create Your First Invoice
+            </a>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<script>
+// Add fade-in animation to table rows
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.1}s`;
+    });
+});
+
+// Confirm delete action
+document.addEventListener('click', function(e) {
+    if (e.target.closest('a[href*="inv_delete"]')) {
+        const invoiceTitle = e.target.closest('tr').querySelector('strong').textContent;
+        if (!confirm(`Are you sure you want to delete "${invoiceTitle}"?`)) {
+            e.preventDefault();
+        }
+    }
+});
+</script>
 {% endblock %}

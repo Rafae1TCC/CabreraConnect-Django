@@ -1,0 +1,226 @@
+{% extends 'inv-base.html' %}
+{% load static %}
+
+{% block title %}Delete Invoice - Cabrera Connect{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/invoice-styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header" style="border-left: 4px solid #dc2626;">
+        <div>
+            <h1 class="page-title" style="color: #dc2626;">⚠️ Delete Invoice</h1>
+            <p class="page-subtitle">This action cannot be undone</p>
+        </div>
+        <div class="folio-info">
+            <div class="folio-label">Invoice #</div>
+            <div class="folio-number" style="color: #dc2626;">{{ invoice.folio|default:invoice.id }}</div>
+        </div>
+    </div>
+
+    <!-- Warning Alert -->
+    <div class="alert alert-danger">
+        <span style="font-size: 1.2rem; margin-right: 0.5rem;">⚠️</span>
+        <div>
+            <strong>Warning!</strong> You are about to permanently delete this invoice. This action cannot be reversed.
+        </div>
+    </div>
+
+    <!-- Invoice Details -->
+    <div class="delete-confirmation">
+        <h2 style="color: #dc2626; margin-bottom: 1.5rem;">Invoice Details</h2>
+        <p style="margin-bottom: 2rem;">Please review the invoice details before confirming deletion:</p>
+
+        <div class="invoice-details-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <div class="detail-card" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffcc00;">
+                <h4 style="color: #1a1a1a; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Invoice ID</h4>
+                <p style="font-size: 1.1rem; font-weight: 600; color: #333;">#{{ invoice.id }}</p>
+            </div>
+
+            {% if invoice.folio %}
+            <div class="detail-card" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffcc00;">
+                <h4 style="color: #1a1a1a; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Folio</h4>
+                <p style="font-size: 1.1rem; font-weight: 600; color: #333;">{{ invoice.folio }}</p>
+            </div>
+            {% endif %}
+
+            <div class="detail-card" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffcc00;">
+                <h4 style="color: #1a1a1a; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Title</h4>
+                <p style="font-size: 1.1rem; font-weight: 600; color: #333;">{{ invoice.title }}</p>
+            </div>
+
+            <div class="detail-card" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffcc00;">
+                <h4 style="color: #1a1a1a; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Client</h4>
+                <p style="font-size: 1.1rem; font-weight: 600; color: #333;">{{ invoice.clt_name }}</p>
+            </div>
+
+            {% if invoice.date %}
+            <div class="detail-card" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffcc00;">
+                <h4 style="color: #1a1a1a; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Date</h4>
+                <p style="font-size: 1.1rem; font-weight: 600; color: #333;">{{ invoice.date|date:"F d, Y" }}</p>
+            </div>
+            {% endif %}
+
+            <div class="detail-card" style="background: #fef2f2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
+                <h4 style="color: #dc2626; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</h4>
+                <p style="font-size: 1.3rem; font-weight: 700; color: #dc2626;">${{ invoice.total|floatformat:2 }}</p>
+            </div>
+        </div>
+
+        <!-- Products Summary -->
+        {% if invoice.products %}
+        <div class="products-summary" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+            <h4 style="color: #1a1a1a; margin-bottom: 1rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Products/Services ({{ invoice.products|length }} item{{ invoice.products|length|pluralize }})</h4>
+            <div style="max-height: 200px; overflow-y: auto;">
+                {% for product in invoice.products %}
+                <div style="padding: 0.5rem 0; border-bottom: 1px solid #e5e5e5; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 500;">{{ product.name }}</span>
+                    <span style="color: #666;">{{ product.quantity }} × ${{ product.price|floatformat:2 }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Confirmation Form -->
+        <div class="confirmation-section" style="background: #ffffff; border: 2px solid #dc2626; border-radius: 8px; padding: 2rem; text-align: center;">
+            <div style="margin-bottom: 2rem;">
+                <div style="font-size: 3rem; color: #dc2626; margin-bottom: 1rem;">🗑️</div>
+                <h3 style="color: #dc2626; margin-bottom: 0.5rem;">Confirm Deletion</h3>
+                <p style="color: #666;">Type <strong>"DELETE"</strong> to confirm that you want to permanently remove this invoice.</p>
+            </div>
+
+            <form method="post" action="{% url 'inv_delete' invoice.id %}" id="deleteForm">
+                {% csrf_token %}
+                
+                <div style="margin-bottom: 2rem;">
+                    <input type="text" 
+                           id="confirmInput" 
+                           class="form-control" 
+                           placeholder="Type DELETE to confirm"
+                           style="text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; border-color: #dc2626;"
+                           autocomplete="off"
+                           required>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'inv_list' %}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="btn btn-danger btn-lg" 
+                            id="deleteBtn" 
+                            disabled
+                            style="opacity: 0.5;">
+                        Yes, Delete Permanently
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Additional Warning -->
+        <div class="final-warning" style="background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; padding: 1rem; margin-top: 2rem; text-align: center;">
+            <p style="color: #d97706; font-size: 0.9rem; margin: 0;">
+                <strong>Remember:</strong> Once deleted, this invoice and all its associated data will be permanently removed from the system.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmInput = document.getElementById('confirmInput');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    // Enable/disable delete button based on confirmation input
+    confirmInput.addEventListener('input', function() {
+        const value = this.value.trim().toUpperCase();
+        
+        if (value === 'DELETE') {
+            deleteBtn.disabled = false;
+            deleteBtn.style.opacity = '1';
+            this.style.borderColor = '#22c55e';
+            this.style.backgroundColor = '#f0fdf4';
+        } else {
+            deleteBtn.disabled = true;
+            deleteBtn.style.opacity = '0.5';
+            this.style.borderColor = '#dc2626';
+            this.style.backgroundColor = '#ffffff';
+        }
+    });
+    
+    // Handle form submission with final confirmation
+    deleteForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const confirmValue = confirmInput.value.trim().toUpperCase();
+        
+        if (confirmValue !== 'DELETE') {
+            alert('Please type "DELETE" to confirm.');
+            confirmInput.focus();
+            return;
+        }
+        
+        // Final confirmation dialog
+        const finalConfirm = confirm(
+            `Are you absolutely sure you want to delete invoice "{{ invoice.title }}"?\n\n` +
+            `This action cannot be undone and all data will be permanently lost.`
+        );
+        
+        if (finalConfirm) {
+            // Show loading state
+            deleteBtn.classList.add('loading');
+            deleteBtn.disabled = true;
+            confirmInput.disabled = true;
+            
+            // Add a slight delay to show the loading state
+            setTimeout(() => {
+                this.submit();
+            }, 500);
+        }
+    });
+    
+    // Auto-focus on confirmation input
+    confirmInput.focus();
+    
+    // Prevent accidental navigation
+    window.addEventListener('beforeunload', function(e) {
+        if (confirmInput.value.trim() !== '') {
+            e.preventDefault();
+            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
+    });
+});
+
+// Add visual feedback for dangerous action
+document.addEventListener('mouseenter', function(e) {
+    if (e.target.id === 'deleteBtn' && !e.target.disabled) {
+        e.target.style.transform = 'translateY(-2px)';
+        e.target.style.boxShadow = '0 8px 25px rgba(220, 38, 38, 0.4)';
+    }
+});
+
+document.addEventListener('mouseleave', function(e) {
+    if (e.target.id === 'deleteBtn') {
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = '0 8px 25px rgba(220, 38, 38, 0.3)';
+    }
+});
+
+// Animate the warning icon
+const warningIcon = document.querySelector('.confirmation-section > div > div');
+if (warningIcon) {
+    setInterval(() => {
+        warningIcon.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            warningIcon.style.transform = 'scale(1)';
+        }, 200);
+    }, 2000);
+}
+</script>
+
+{% endblock %}

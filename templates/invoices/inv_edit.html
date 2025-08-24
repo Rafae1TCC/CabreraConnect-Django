@@ -3,12 +3,379 @@
 
 {% block title %}Edit Invoice - Cabrera Connect{% endblock %}
 
-{% block content %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/invoice-styles.css' %}">
+{% endblock %}
 
+{% block content %}
 <div class="container">
-    <h1>Edit Invoice</h1>
-    <form method = "post" action="{% url 'inv_edit' invoice.id %}">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Edit Invoice</h1>
+            <p class="page-subtitle">Modify invoice details and products</p>
+        </div>
+        <div class="folio-info">
+            <div class="folio-label">Invoice #</div>
+            <div class="folio-number">{{ invoice.folio|default:invoice.id }}</div>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <form method="post" action="{% url 'inv_edit' invoice.id %}" id="invoiceForm">
         {% csrf_token %}
-        {{ form.as_p}}
-    <button type = "submit" class = "btn btn-primary">Save Changes</button>    
+        
+        <!-- Invoice Details Section -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Invoice Information</h3>
+            </div>
+            <div class="section-content">
+                <div class="form-row">
+                    {% for field in form %}
+                        <div class="form-group">
+                            <label class="form-label" for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {% if field.field.widget.input_type == 'select' %}
+                                <select name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}">
+                                    {% for value, label in field.field.choices %}
+                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% elif field.field.widget.input_type == 'textarea' %}
+                                <textarea name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">{{ field.value|default:'' }}</textarea>
+                            {% else %}
+                                <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                       name="{{ field.name }}" 
+                                       class="form-control" 
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value|default:'' }}"
+                                       placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">
+                            {% endif %}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <div class="alert alert-danger">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Products & Services</h3>
+            </div>
+            <div class="section-content">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Product/Service</th>
+                                <th>Quantity</th>
+                                <th>Discount (%)</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsBody">
+                            {% for product in invoice.products %}
+                            <tr class="product-row fade-in">
+                                <td>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           name="title" 
+                                           value="{{ product.name }}"
+                                           placeholder="Enter product or service name"
+                                           required>
+                                </td>
+                                <td>
+                                    <input type="number" 
+                                           class="form-control quantity-input" 
+                                           name="quantity" 
+                                           value="{{ product.quantity }}" 
+                                           min="1"
+                                           required>
+                                </td>
+                                <td>
+                                    <input type="number" 
+                                           class="form-control discount-input" 
+                                           name="discount" 
+                                           value="{{ product.discount_percent }}" 
+                                           min="0" 
+                                           max="100"
+                                           step="0.01">
+                                </td>
+                                <td>
+                                    <input type="number" 
+                                           class="form-control price-input" 
+                                           name="price" 
+                                           value="{{ product.price }}" 
+                                           step="0.01"
+                                           min="0"
+                                           required>
+                                </td>
+                                <td>
+                                    <span class="row-total">$0.00</span>
+                                </td>
+                                <td>
+                                    <button type="button" 
+                                            class="btn btn-danger btn-sm deleteRow" 
+                                            title="Remove this product">
+                                            Delete
+                                    </button>
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="addProduct">
+                        Add Another Product
+                    </button>
+                </div>
+
+                <!-- Totals Summary -->
+                <div class="form-row" style="margin-top: 2rem;">
+                    <div class="form-group">
+                        <!-- Spacer -->
+                    </div>
+                    <div class="form-group">
+                        <div class="totals-summary" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px;">
+                            <div class="total-row">
+                                <span>Subtotal:</span>
+                                <span id="subtotal">$0.00</span>
+                            </div>
+                            <div class="total-row">
+                                <span>Total Discount:</span>
+                                <span id="totalDiscount">$0.00</span>
+                            </div>
+                            <div class="total-row final">
+                                <span>Total Amount:</span>
+                                <span id="grandTotal">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden input for products data -->
+        <input type="hidden" name="products" id="productsInput">
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <a href="{% url 'inv_list' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                Update Invoice
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const productsBody = document.getElementById('productsBody');
+    const addProductBtn = document.getElementById('addProduct');
+    const invoiceForm = document.getElementById('invoiceForm');
+    const productsInput = document.getElementById('productsInput');
+    
+    // Calculate totals for a row
+    function calculateRowTotal(row) {
+        const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const price = parseFloat(row.querySelector('.price-input').value) || 0;
+        const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
+        
+        const subtotal = quantity * price;
+        const discountAmount = (subtotal * discount) / 100;
+        const total = subtotal - discountAmount;
+        
+        row.querySelector('.row-total').textContent = '$' + total.toFixed(2);
+        
+        updateGrandTotal();
+    }
+    
+    // Update grand total
+    function updateGrandTotal() {
+        let subtotal = 0;
+        let totalDiscount = 0;
+        
+        document.querySelectorAll('.product-row').forEach(row => {
+            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
+            
+            const rowSubtotal = quantity * price;
+            const rowDiscountAmount = (rowSubtotal * discount) / 100;
+            
+            subtotal += rowSubtotal;
+            totalDiscount += rowDiscountAmount;
+        });
+        
+        const grandTotal = subtotal - totalDiscount;
+        
+        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
+        document.getElementById('totalDiscount').textContent = '$' + totalDiscount.toFixed(2);
+        document.getElementById('grandTotal').textContent = '$' + grandTotal.toFixed(2);
+    }
+    
+    // Add event listeners to existing row
+    function addRowListeners(row) {
+        const inputs = row.querySelectorAll('.quantity-input, .price-input, .discount-input');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => calculateRowTotal(row));
+            input.addEventListener('change', () => calculateRowTotal(row));
+        });
+        
+        const deleteBtn = row.querySelector('.deleteRow');
+        deleteBtn.addEventListener('click', function() {
+            if (productsBody.children.length > 1) {
+                row.remove();
+                updateGrandTotal();
+            } else {
+                alert('At least one product is required.');
+            }
+        });
+    }
+    
+    // Add listeners to all existing rows
+    document.querySelectorAll('.product-row').forEach(row => {
+        addRowListeners(row);
+    });
+    
+    // Add new product row
+    addProductBtn.addEventListener('click', function() {
+        const newRow = document.createElement('tr');
+        newRow.className = 'product-row fade-in';
+        
+        newRow.innerHTML = `
+            <td>
+                <input type="text" 
+                       class="form-control" 
+                       name="title" 
+                       placeholder="Enter product or service name"
+                       required>
+            </td>
+            <td>
+                <input type="number" 
+                       class="form-control quantity-input" 
+                       name="quantity" 
+                       value="1" 
+                       min="1"
+                       required>
+            </td>
+            <td>
+                <input type="number" 
+                       class="form-control discount-input" 
+                       name="discount" 
+                       value="0" 
+                       min="0" 
+                       max="100"
+                       step="0.01">
+            </td>
+            <td>
+                <input type="number" 
+                       class="form-control price-input" 
+                       name="price" 
+                       value="0" 
+                       step="0.01"
+                       min="0"
+                       required>
+            </td>
+            <td>
+                <span class="row-total">$0.00</span>
+            </td>
+            <td>
+                <button type="button" 
+                        class="btn btn-danger btn-sm deleteRow" 
+                        title="Remove this product">
+                        Delete
+                </button>
+            </td>
+        `;
+        
+        productsBody.appendChild(newRow);
+        addRowListeners(newRow);
+        
+        // Focus on the new product name input
+        newRow.querySelector('input[name="title"]').focus();
+    });
+    
+    // Handle form submission
+    invoiceForm.addEventListener('submit', function(e) {
+        const products = [];
+        const rows = document.querySelectorAll('.product-row');
+        
+        let isValid = true;
+        
+        rows.forEach(row => {
+            const title = row.querySelector('input[name="title"]').value.trim();
+            const quantity = row.querySelector('.quantity-input').value;
+            const discount = row.querySelector('.discount-input').value;
+            const price = row.querySelector('.price-input').value;
+            
+            if (!title || !quantity || !price) {
+                isValid = false;
+                return;
+            }
+            
+            products.push({
+                name: title,
+                quantity: parseInt(quantity),
+                discount_percent: parseFloat(discount),
+                price: parseFloat(price)
+            });
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required product fields.');
+            return;
+        }
+        
+        if (products.length === 0) {
+            e.preventDefault();
+            alert('At least one product is required.');
+            return;
+        }
+        
+        productsInput.value = JSON.stringify(products);
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+    });
+    
+    // Initial calculation for all existing rows
+    document.querySelectorAll('.product-row').forEach(row => {
+        calculateRowTotal(row);
+    });
+    
+    updateGrandTotal();
+});
+
+// Form validation
+document.addEventListener('input', function(e) {
+    if (e.target.matches('.form-control[required]')) {
+        if (e.target.value.trim() === '') {
+            e.target.style.borderColor = '#dc2626';
+        } else {
+            e.target.style.borderColor = '#22c55e';
+        }
+    }
+});
+</script>
+
 {% endblock %}

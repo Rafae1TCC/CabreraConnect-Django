@@ -1,0 +1,251 @@
+{% load static %}
+{% load humanize %}
+{% load custom_filters %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* A4 size styling */
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .a4-container {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 5mm;
+        margin: 10mm auto;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    header {
+        background-color: #007bff;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    header h4, header p {
+        color: white;
+        margin: 0;
+    }
+
+    .section-title {
+        border-bottom: 2px solid #007bff;
+        margin: 1.5rem 0;
+        color: #007bff;
+    }
+
+    .product-table th {
+        background-color: #f8f9fa;
+    }
+    .product-table td{
+        font-size: 0.8rem;
+    }
+
+    .totals-summary {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .total-row.final {
+        font-weight: bold;
+        font-size: 1.2rem;
+        border-top: 2px solid #dee2e6;
+        padding-top: 0.5rem;
+    }
+
+    /* Cliente/Venta con flex (para PDF) */
+    .client-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+    }
+    .client-info .left, 
+    .client-info .right {
+        width: 48%;
+    }
+    .client-info .right {
+        text-align: right;
+    }
+    .client-info p{        
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Print styles */
+    @media print {
+        body {
+            background-color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .a4-container {
+            box-shadow: none;
+            margin: 0;
+            padding: 10mm;
+            page-break-after: always;
+        }
+
+        .no-print {
+            display: none;
+        }
+
+        .invoice-page {
+            page-break-after: always;
+        }
+
+        .invoice-page:last-child {
+            page-break-after: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Botones solo en vista previa -->
+{% if preview %}
+<div class="container no-print">
+    <div class="d-flex justify-content-center mt-3">
+        <a href="{% url 'inv_pdf' invoice.id %}" class="btn btn-primary me-2">
+            <i class="fas fa-download"></i> Descargar PDF
+        </a>
+        <a href="{% url 'inv_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% for products in pages %}
+<div class="a4-container invoice-page">
+
+    {% if forloop.first %}
+    <!-- SOLO primera página -->
+    <header class="d-flex justify-content-between align-items-center">
+        <img src="{% static 'img/cc.png' %}" alt="Logo" class="img-fluid" style="max-height: 80px;">
+        <div class="header-right">
+            <h4>Cabrera Connect</h4>
+            <p>Tijuana, Baja California</p>
+            <p>Contacto: 664 312 3031</p>
+        </div>
+    </header>
+
+    <h2 class="section-title">Datos del Cliente y la Venta</h2>
+    <div class="client-info">
+        <div class="left">
+            <p><strong>Nombre de la Nota:</strong> {{ invoice.title }}</p>
+            <p><strong>Cliente:</strong> {{ invoice.clt_name }}</p>
+            <p><strong>Correo:</strong> {{ invoice.clt_email }}</p>
+            <p><strong>Teléfono:</strong> {{ invoice.clt_phone }}</p>
+            {% if invoice.comments %}
+            <p><strong>Comentarios adicionales:</strong>{{ invoice.comments }}</p>
+            {% endif %}
+        </div>
+        <div class="right">
+            <p><strong>Folio:</strong> {{ invoice.folio }}</p>
+            <p><strong>Fecha:</strong> {{ invoice.date|date:"d/m/Y" }}</p>
+            <p><strong>Garantía:</strong> {{ invoice.warranty_months }} Mes(es)</p>
+            <p><strong>Método de Pago:</strong> {{ invoice.get_payment_method_display }}</p>
+        </div>
+    </div>
+
+    {% endif %}
+
+    <!-- Productos -->
+    <h2 class="section-title">Detalle de Productos</h2>
+    <table class="table table-bordered product-table">
+        <thead>
+            <tr>
+                <th>Producto/Servicio</th>
+                <th>Precio Unitario</th>
+                <th>Unidades</th>
+                <th>Descuento</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.price|floatformat:2|intcomma }} {{ invoice.currency }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>
+                    {% if product.discount_percent %}
+                        {{ product.discount_percent|floatformat:2 }}%
+                    {% else %}-{% endif %}
+                </td>
+                <td>
+                    {% with line_total=product.price|mul:product.quantity %}
+                        {% if product.discount_percent %}
+                            {% with discount_amount=line_total|mul:product.discount_percent|div:100 %}
+                                {{ line_total|sub:discount_amount|floatformat:2|intcomma }}
+                            {% endwith %}
+                        {% else %}
+                            {{ line_total|floatformat:2|intcomma }}
+                        {% endif %}
+                        {{ invoice.currency }}
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Resumen financiero -->
+    <footer class="mt-4">
+        <h2 class="section-title">Resumen Financiero</h2>
+        <div class="client-info">
+            <div class="left">
+                {% if invoice.currency == "USD" %}
+                    <p><strong>Tipo de Cambio:</strong> {{ invoice.exchange_rate|floatformat:2 }}</p>
+                {% endif %}
+                <p><strong>Moneda:</strong> {{ invoice.get_currency_display }}</p>
+                <p><strong>Vendedor:</strong> {{ invoice.sell_name }}</p>
+                <p><strong>Email Vendedor:</strong> {{ invoice.sell_email }}</p>
+                <p><strong>Teléfono Vendedor:</strong> {{ invoice.sell_phone }}</p>
+            </div>
+            <div class="right">
+                <div class="totals-summary">
+                    <div class="total-row">
+                        <span>Subtotal:</span>
+                        <span>{{ invoice.subtotal|floatformat:2|intcomma }} {{ invoice.currency }}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Descuento Total:</span>
+                        <span>{{ invoice.total_discount|floatformat:2|intcomma }} {{ invoice.currency }}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>IVA ({{ invoice.tax_rate|floatformat:2 }}%):</span>
+                        <span>{{ invoice.total_tax|floatformat:2|intcomma }} {{ invoice.currency }}</span>
+                    </div>
+                    <div class="total-row final">
+                        <span>Total:</span>
+                        <span>{{ invoice.total|floatformat:2|intcomma }} {{ invoice.currency }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="text-center mt-3" style="font-size: 0.9rem; color: #6c757d;">
+        Página {{ forloop.counter }} de {{ total_pages }}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
