@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.db import models
 from django.db.models import JSONField
 
@@ -49,20 +49,6 @@ class Invoice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        # Auto-generate folio if not provided
-        if not self.folio:
-            last_invoice = Invoice.objects.filter(folio__startswith='COT-').order_by('folio').last()
-            if last_invoice:
-                last_number = int(last_invoice.folio.split('-')[1])
-                self.folio = f'COT-{last_number + 1:04d}'
-            else:
-                self.folio = 'COT-0001'
-        
-        # Calculate totals before saving
-        self.calculate_totals()
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.folio} - {self.title}"
     
@@ -94,17 +80,21 @@ class Invoice(models.Model):
         total_discount = Decimal('0')
         total_tax = Decimal('0')
         
+        # Handle case where products is None or empty
+        if not self.products:
+            self.products = []
+        
         for product in self.products:
-            quantity = Decimal(str(product.get('quantity', 1)))
-            price = Decimal(str(product.get('price', 0)))
+            # Safely convert values to Decimal with defaults
+            quantity = self._safe_decimal(product.get('quantity', 1))
+            price = self._safe_decimal(product.get('price', 0))
+            discount_percent = self._safe_decimal(product.get('discount_percent', 0))
+            discount_amount = self._safe_decimal(product.get('discount_amount', 0))
             
             # Calculate line totals
             line_subtotal = price * quantity
             
             # Calculate discounts
-            discount_percent = Decimal(str(product.get('discount_percent', 0)))
-            discount_amount = Decimal(str(product.get('discount_amount', 0)))
-            
             if discount_percent > 0:
                 line_discount = line_subtotal * (discount_percent / 100)
             else:
@@ -113,8 +103,9 @@ class Invoice(models.Model):
             line_total = line_subtotal - line_discount
             
             # Calculate tax if applicable
+            tax_rate = self._safe_decimal(self.tax_rate)
             if product.get('taxable', True):
-                line_tax = line_total * (Decimal(str(self.tax_rate)) / 100)
+                line_tax = line_total * (tax_rate / 100)
             else:
                 line_tax = Decimal('0')
             
@@ -124,16 +115,50 @@ class Invoice(models.Model):
             total_tax += line_tax
             
             # Update product entry with calculated values
-            product['line_subtotal'] = str(line_subtotal)
-            product['line_discount'] = str(line_discount)
-            product['line_total'] = str(line_total)
-            product['line_tax'] = str(line_tax)
+            product['line_subtotal'] = float(line_subtotal)
+            product['line_discount'] = float(line_discount)
+            product['line_total'] = float(line_total)
+            product['line_tax'] = float(line_tax)
         
-        # Update model fields
+        # Update model fields with safe defaults
         self.subtotal = subtotal
         self.total_discount = total_discount
         self.total_tax = total_tax
         self.total = subtotal - total_discount + total_tax
+    
+    def _safe_decimal(self, value, default=0):
+        """Safely convert a value to Decimal, handling None and invalid values"""
+        if value is None:
+            return Decimal(str(default))
+        try:
+            return Decimal(str(value))
+        except (InvalidOperation, TypeError, ValueError):
+            return Decimal(str(default))
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate folio if not provided
+        if not self.folio:
+            last_invoice = Invoice.objects.filter(folio__startswith='COT-').order_by('folio').last()
+            if last_invoice:
+                try:
+                    last_number = int(last_invoice.folio.split('-')[1])
+                    self.folio = f'COT-{last_number + 1:04d}'
+                except (IndexError, ValueError):
+                    self.folio = 'COT-0001'
+            else:
+                self.folio = 'COT-0001'
+        
+        # Ensure all decimal fields have valid values before saving
+        self.subtotal = self._safe_decimal(self.subtotal)
+        self.total_discount = self._safe_decimal(self.total_discount)
+        self.total_tax = self._safe_decimal(self.total_tax)
+        self.total = self._safe_decimal(self.total)
+        self.tax_rate = self._safe_decimal(self.tax_rate, 16.00)
+        self.exchange_rate = self._safe_decimal(self.exchange_rate, 18)
+        
+        # Calculate totals before saving
+        self.calculate_totals()
+        super().save(*args, **kwargs)
     
     def get_product_summary(self):
         """Return a summary of all products with calculated values"""

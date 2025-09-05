@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/contact-form.css' %}">
+{% endblock css %}
+
+{% block title %}Cabrera Connect - Security & IoT Solutions{% endblock title %}
+
+
+{% block content %}
+
+<div class="form-container">
+    <form method="post" class="contact-form" action="{% url 'contact_form' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if success %}
+        <div class="alert alert-success">
+            ✓ Thank you! Your message has been sent successfully.
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert alert-error">
+            ⚠ There was an error sending your message. Please try again.
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Send Message</button>
+    </form>
+</div>
+
+{% endblock %}

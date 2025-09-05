@@ -911,3 +911,202 @@ textarea:focus-visible {
     outline: 2px solid #ffcc00;
     outline-offset: 2px;
 }
+
+/* Style the existing form-inline to match your design */
+.form-inline {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e5e5;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    align-items: end;
+    transition: all 0.3s ease;
+}
+
+.form-inline:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Style the filter inputs */
+.form-inline .form-control {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    font-family: inherit;
+    color: #333333;
+    margin: 0;
+}
+
+.form-inline .form-control:focus {
+    outline: none;
+    border-color: #ffcc00;
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-inline .form-control::placeholder {
+    color: #999999;
+    font-style: italic;
+}
+
+/* Style date inputs */
+.form-inline input[type="date"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Style select dropdowns */
+.form-inline select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 13.1l4.2-4.2-1.4-1.4L8 10.3 5.2 7.5 3.8 8.9z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 40px;
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Style the filter buttons */
+.form-inline .btn {
+    height: fit-content;
+    margin-left: 0;
+    margin-right: 0;
+    white-space: nowrap;
+}
+
+.form-inline .btn-secondary {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    border-color: #6b7280;
+    color: #ffffff;
+}
+
+.form-inline .btn-secondary:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    border-color: #4b5563;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(107, 114, 128, 0.3);
+}
+
+.form-inline .btn-light {
+    background: #ffffff;
+    color: #6b7280;
+    border: 2px solid #e5e5e5;
+}
+
+.form-inline .btn-light:hover {
+    background: #f8f8f8;
+    color: #374151;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Remove default margins */
+.form-inline .mr-2,
+.form-inline .ml-2 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.form-inline .mb-3 {
+    margin-bottom: 0 !important;
+}
+
+/* Responsive design for filters */
+@media (max-width: 768px) {
+    .form-inline {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+    
+    .form-inline .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-inline {
+        padding: 1rem;
+    }
+}
+
+/* Focus accessibility for filters */
+.form-inline .form-control:focus-visible,
+.form-inline .btn:focus-visible {
+    outline: 2px solid #ffcc00;
+    outline-offset: 2px;
+}
+
+th a {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+th a:hover {
+    color: #ffcc00;
+}
+
+th a::after {
+    font-size: 0.8rem;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0;
+    gap: 0.4rem;
+}
+
+.pagination .page-item {
+    list-style: none;
+}
+
+.pagination .page-link {
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: #333;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+    background-color: #f5f5f5;
+    border-color: #bbb;
+    text-decoration: none;
+    color: #000;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: #e9ecef;
+    color: #aaa;
+    border-color: #ddd;
+    cursor: not-allowed;
+}

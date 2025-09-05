@@ -21,9 +21,26 @@
         </div>
     </div>
 
+    <!-- Display form errors at the top -->
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>Please fix the following errors:</strong>
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ field|title }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
     <!-- Main Form -->
     <form method="post" action="{% url 'inv_edit' invoice.id %}" id="invoiceForm">
         {% csrf_token %}
+        
+        <!-- Include the hidden products_json field -->
+        {{ form.products_json }}
         
         <!-- Invoice Details Section -->
         <div class="form-section">
@@ -33,11 +50,14 @@
             <div class="section-content">
                 <div class="form-row">
                     {% for field in form %}
+                        {% if field.name != 'products_json' %}  {# Skip the hidden products field #}
                         <div class="form-group">
                             <label class="form-label" for="{{ field.id_for_label }}">
                                 {{ field.label }}
                             </label>
-                            {% if field.field.widget.input_type == 'select' %}
+                            
+                            {% if field.name == 'currency' or field.name == 'payment_method' %}
+                                {# Select fields #}
                                 <select name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}">
                                     {% for value, label in field.field.choices %}
                                         <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
@@ -45,22 +65,40 @@
                                         </option>
                                     {% endfor %}
                                 </select>
-                            {% elif field.field.widget.input_type == 'textarea' %}
-                                <textarea name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">{{ field.value|default:'' }}</textarea>
+                            
+                            {% elif field.name == 'comments' %}
+                                {# Textarea field #}
+                                <textarea name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" 
+                                          placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}" 
+                                          rows="3">{{ field.value|default:'' }}</textarea>
+                            
+                            {% elif field.name == 'date' %}
+                                {# Date field with proper format #}
+                                <input type="date" 
+                                       name="{{ field.name }}" 
+                                       class="form-control" 
+                                       id="{{ field.id_for_label }}"
+                                       value="{{ field.value|date:'Y-m-d' }}"
+                                       pattern="\d{4}-\d{2}-\d{2}">
+                            
                             {% else %}
+                                {# Regular input fields #}
                                 <input type="{{ field.field.widget.input_type|default:'text' }}" 
                                        name="{{ field.name }}" 
                                        class="form-control" 
                                        id="{{ field.id_for_label }}"
                                        value="{{ field.value|default:'' }}"
-                                       placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">
+                                       placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
+                                       {% if field.field.widget.attrs.step %}step="{{ field.field.widget.attrs.step }}"{% endif %}>
                             {% endif %}
+                            
                             {% if field.errors %}
                                 {% for error in field.errors %}
                                     <div class="alert alert-danger">{{ error }}</div>
                                 {% endfor %}
                             {% endif %}
                         </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -90,7 +128,7 @@
                                 <td>
                                     <input type="text" 
                                            class="form-control" 
-                                           name="title" 
+                                           name="product_name" 
                                            value="{{ product.name }}"
                                            placeholder="Enter product or service name"
                                            required>
@@ -132,7 +170,6 @@
                                     </button>
                                 </td>
                             </tr>
-
                             {% endfor %}
                         </tbody>
                     </table>
@@ -169,9 +206,6 @@
             </div>
         </div>
 
-        <!-- Hidden input for products data -->
-        <input type="hidden" name="products" id="productsInput">
-
         <!-- Form Actions -->
         <div class="form-actions">
             <a href="{% url 'inv_list' %}" class="btn btn-secondary">
@@ -189,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const productsBody = document.getElementById('productsBody');
     const addProductBtn = document.getElementById('addProduct');
     const invoiceForm = document.getElementById('invoiceForm');
-    const productsInput = document.getElementById('productsInput');
+    const productsInput = document.getElementById('id_products_json'); // Use the form's hidden field
     
     // Calculate totals for a row
     function calculateRowTotal(row) {
@@ -252,6 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add listeners to all existing rows
     document.querySelectorAll('.product-row').forEach(row => {
         addRowListeners(row);
+        calculateRowTotal(row); // Calculate initial totals
     });
     
     // Add new product row
@@ -263,7 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td>
                 <input type="text" 
                        class="form-control" 
-                       name="title" 
+                       name="product_name" 
                        placeholder="Enter product or service name"
                        required>
             </td>
@@ -309,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addRowListeners(newRow);
         
         // Focus on the new product name input
-        newRow.querySelector('input[name="title"]').focus();
+        newRow.querySelector('input[name="product_name"]').focus();
     });
     
     // Handle form submission
@@ -320,18 +355,21 @@ document.addEventListener('DOMContentLoaded', function() {
         let isValid = true;
         
         rows.forEach(row => {
-            const title = row.querySelector('input[name="title"]').value.trim();
+            const productName = row.querySelector('input[name="product_name"]').value.trim();
             const quantity = row.querySelector('.quantity-input').value;
             const discount = row.querySelector('.discount-input').value;
             const price = row.querySelector('.price-input').value;
             
-            if (!title || !quantity || !price) {
+            if (!productName || !quantity || !price) {
                 isValid = false;
+                row.style.border = '2px solid red';
                 return;
+            } else {
+                row.style.border = '';
             }
             
             products.push({
-                name: title,
+                name: productName,
                 quantity: parseInt(quantity),
                 discount_percent: parseFloat(discount),
                 price: parseFloat(price)
@@ -350,6 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Update the form's hidden field
         productsInput.value = JSON.stringify(products);
         
         // Show loading state
@@ -358,11 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = true;
     });
     
-    // Initial calculation for all existing rows
-    document.querySelectorAll('.product-row').forEach(row => {
-        calculateRowTotal(row);
-    });
-    
+    // Initial calculation
     updateGrandTotal();
 });
 

@@ -25,46 +25,67 @@
     <form method="post" action="{% url 'inv_crt' %}" id="invoiceForm">
         {% csrf_token %}
         
-        <!-- Invoice Details Section -->
-        <div class="form-section">
-            <div class="section-header">
-                <h3 class="section-title">Invoice Information</h3>
-            </div>
-            <div class="section-content">
-                <div class="form-row">
-                    {% for field in form %}
-                        <div class="form-group">
-                            <label class="form-label" for="{{ field.id_for_label }}">
-                                {{ field.label }}
-                            </label>
-                            {% if field.field.widget.input_type == 'select' %}
-                                <select name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}">
-                                    {% for value, label in field.field.choices %}
-                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
-                                            {{ label }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            {% elif field.field.widget.input_type == 'textarea' %}
-                                <textarea name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">{{ field.value|default:'' }}</textarea>
-                            {% else %}
-                                <input type="{{ field.field.widget.input_type|default:'text' }}" 
-                                       name="{{ field.name }}" 
-                                       class="form-control" 
-                                       id="{{ field.id_for_label }}"
-                                       value="{{ field.value|default:'' }}"
-                                       placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">
-                            {% endif %}
-                            {% if field.errors %}
-                                {% for error in field.errors %}
-                                    <div class="alert alert-danger">{{ error }}</div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+    <!-- Invoice Details Section -->
+    <div class="form-section">
+        <div class="section-header">
+            <h3 class="section-title">Invoice Information</h3>
+        </div>
+        <div class="section-content">
+            <div class="form-row">
+            {% for field in form %}
+                {% if field.name != 'products_json' %}
+                <div class="form-group">
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    
+                    {% if field.name == 'currency' or field.name == 'payment_method' %}
+                        {# Select fields #}
+                        <select name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}">
+                            {% for value, label in field.field.choices %}
+                                <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    
+                    {% elif field.name == 'comments' %}
+                        {# Textarea field #}
+                        <textarea name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" 
+                                placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}" 
+                                rows="3">{{ field.value|default:'' }}</textarea>
+                    
+                    {% elif field.name == 'date' %}
+                        {# Date field with proper format #}
+                        <input type="date" 
+                            name="{{ field.name }}" 
+                            class="form-control" 
+                            id="{{ field.id_for_label }}"
+                            value="{{ field.value|default:'' }}"
+                            pattern="\d{4}-\d{2}-\d{2}">
+                    
+                    {% else %}
+                        {# Regular input fields #}
+                        <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                            name="{{ field.name }}" 
+                            class="form-control" 
+                            id="{{ field.id_for_label }}"
+                            value="{{ field.value|default:'' }}"
+                            placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
+                            {% if field.field.widget.attrs.step %}step="{{ field.field.widget.attrs.step }}"{% endif %}>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
+                {% endif %}
+            {% endfor %}
             </div>
         </div>
+    </div>
 
         <!-- Products Section -->
         <div class="form-section">
@@ -89,7 +110,7 @@
                                 <td>
                                     <input type="text" 
                                            class="form-control" 
-                                           name="title" 
+                                           name="product_name" 
                                            placeholder="Enter product or service name"
                                            required>
                                 </td>
@@ -165,8 +186,8 @@
             </div>
         </div>
 
-        <!-- Hidden input for products data -->
-        <input type="hidden" name="products" id="productsInput">
+        <!-- input for products data -->
+        {{ form.products_json }}
 
         <!-- Form Actions -->
         <div class="form-actions">
@@ -257,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <td>
                 <input type="text" 
                        class="form-control" 
-                       name="title" 
+                       name="product_name" 
                        placeholder="Enter product or service name"
                        required>
             </td>
@@ -303,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addRowListeners(newRow);
         
         // Focus on the new product name input
-        newRow.querySelector('input[name="title"]').focus();
+        newRow.querySelector('input[name="product_name"]').focus();
     });
     
     // Handle form submission
@@ -314,18 +335,18 @@ document.addEventListener('DOMContentLoaded', function() {
         let isValid = true;
         
         rows.forEach(row => {
-            const title = row.querySelector('input[name="title"]').value.trim();
+            const productName = row.querySelector('input[name="product_name"]').value.trim();
             const quantity = row.querySelector('.quantity-input').value;
             const discount = row.querySelector('.discount-input').value;
             const price = row.querySelector('.price-input').value;
             
-            if (!title || !quantity || !price) {
+            if (!productName || !quantity || !price) {
                 isValid = false;
                 return;
             }
             
             products.push({
-                name: title,
+                name: productName,
                 quantity: parseInt(quantity),
                 discount_percent: parseFloat(discount),
                 price: parseFloat(price)
@@ -344,7 +365,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        productsInput.value = JSON.stringify(products);
+        // Use the hidden field from the form, not a separate input
+        document.getElementById('id_products_json').value = JSON.stringify(products);
         
         // Show loading state
         const submitBtn = document.getElementById('submitBtn');

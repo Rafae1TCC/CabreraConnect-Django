@@ -8,4 +8,5 @@ urlpatterns = [
     path('delete/<int:pk>/', views.inv_delete, name="inv_delete"),
     path('template/', views.invoice_template, name="inv_template"),
     path('pdf/<int:pk>/', views.invoice_pdf, name="inv_pdf"),
+    path('send-email/<int:pk>/', views.invoice_email, name="inv_email"),
 ]
