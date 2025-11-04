@@ -4,14 +4,14 @@ from django.db.models import JSONField
 
 class Invoice(models.Model):
     CURRENCY = [
-        ('MXN', 'Mexican Pesos'),
-        ('USD', 'Dollars'),
+        ('MXN', 'Pesos Mexicanos'),
+        ('USD', 'Dolares'),
     ]
 
     PAY_METHOD = [
-        ('cash', 'Cash'),
-        ('card', 'Card'),
-        ('transfer', 'Bank transfer'),
+        ('cash', 'Efectivo'),
+        ('card', 'Tarjeta de crédito/débito'),
+        ('transfer', 'Transferencia bancaria'),
     ]
 
     # Selling information
