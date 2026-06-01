@@ -1,5 +1,319 @@
 {% extends 'base.html' %}
-
 {% load static %}
+{% load i18n %}
 
-{% block title %}Cabrera Connect - Security & IoT Solutions{% endblock title %}
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+{% endblock css %}
+
+{% block title %}About Us — Cabrera Connect{% endblock title %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  HERO                                                         -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="about-hero">
+    <div class="ah-bg-text" aria-hidden="true">ABOUT</div>
+    <div class="ah-inner">
+        <div class="ah-label-row">
+            <span class="section-label">Our Story</span>
+            <span class="ah-year">Est. 2023</span>
+        </div>
+        <h1 class="ah-title">
+            Two brothers.<br>
+            One <span class="title-highlight">mission</span>.
+        </h1>
+        <p class="ah-lead">
+            Built on shared values and complementary expertise, Cabrera Connect was founded to give every client — from a family home to a growing enterprise — access to security and IoT solutions that are professional, honest, and built to last.
+        </p>
+    </div>
+    <div class="ah-scroll-hint" aria-hidden="true">
+        <span>Scroll</span>
+        <div class="ah-scroll-line"></div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  OUR STORY                                                    -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="story-section">
+    <div class="story-container">
+
+        <!-- Left: pull-quote column -->
+        <div class="story-left">
+            <div class="story-quote">
+                <div class="sq-mark">"</div>
+                <p class="sq-text">We believe everyone deserves to feel safe in the spaces they've built — and we take that responsibility personally.</p>
+                <div class="sq-attr">— Cabrera Connect</div>
+            </div>
+            <div class="story-founding">
+                <div class="sf-year">2023</div>
+                <div class="sf-label">Year Founded</div>
+                <div class="sf-location">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    Baja California, Mexico
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: prose -->
+        <div class="story-right">
+            <span class="section-label">Who We Are</span>
+            <h2 class="story-heading">A family business with a professional edge</h2>
+            <div class="story-body">
+                <p>
+                    Cabrera Connect was founded in 2023 by two brothers who saw a gap in the local market: businesses and homeowners across Baja California needed reliable, modern security and IoT solutions — but too often found themselves choosing between quality and affordability.
+                </p>
+                <p>
+                    We built this company around the idea that they shouldn't have to choose. One of us brings deep expertise in <strong>hardware and physical security systems</strong> — cameras, access control, structured cabling, and on-site installation. The other specialises in <strong>software integration, IoT ecosystems, and network infrastructure</strong>. Together, we cover every layer of a modern security solution, end to end.
+                </p>
+                <p>
+                    We started with a simple belief: if we wouldn't install it in our own home or business, we won't install it in yours. That standard hasn't changed since day one.
+                </p>
+            </div>
+
+            <div class="story-stats">
+                <div class="ss-item">
+                    <div class="ss-number">500<span>+</span></div>
+                    <div class="ss-label">Installations</div>
+                </div>
+                <div class="ss-item">
+                    <div class="ss-number">2<span>yrs</span></div>
+                    <div class="ss-label">In business</div>
+                </div>
+                <div class="ss-item">
+                    <div class="ss-number">24<span>/7</span></div>
+                    <div class="ss-label">Support</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  THE TEAM                                                     -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="team-section">
+    <div class="team-container">
+        <div class="section-header">
+            <span class="section-label">The Team</span>
+            <h2>The people behind the work</h2>
+            <p>Two skill sets. One shared commitment to doing things right.</p>
+        </div>
+
+        <div class="team-grid">
+
+            <div class="team-card">
+                <div class="tc-avatar">
+                    <div class="tc-avatar-placeholder">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div class="tc-discipline hardware">
+                        <i class="bi bi-tools"></i>
+                        Hardware
+                    </div>
+                </div>
+                <div class="tc-body">
+                    <h3 class="tc-name">Elian Cabrera</h3>
+                    <p class="tc-role">Co-founder &amp; Hardware Lead</p>
+                    <p class="tc-bio">
+                        Specialises in physical security systems — CCTV, access control, alarm systems, and structured cabling. Handles site assessments, installations, and commissioning, ensuring every system is built to perform reliably from day one.
+                    </p>
+                    <div class="tc-tags">
+                        <span class="tc-tag">CCTV &amp; IP Cameras</span>
+                        <span class="tc-tag">Access Control</span>
+                        <span class="tc-tag">Alarm Systems</span>
+                        <span class="tc-tag">Structured Cabling</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-card">
+                <div class="tc-avatar">
+                    <div class="tc-avatar-placeholder">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div class="tc-discipline software">
+                        <i class="bi bi-cpu-fill"></i>
+                        Software
+                    </div>
+                </div>
+                <div class="tc-body">
+                    <h3 class="tc-name">Rafael Cabrera</h3>
+                    <p class="tc-role">Co-founder &amp; Software Lead</p>
+                    <p class="tc-bio">
+                        Leads software integration, IoT deployments, network infrastructure, and cloud management platforms. Bridges the gap between hardware and the digital layer — making systems intelligent, connected, and remotely manageable.
+                    </p>
+                    <div class="tc-tags">
+                        <span class="tc-tag">IoT Integration</span>
+                        <span class="tc-tag">Network Infrastructure</span>
+                        <span class="tc-tag">Cloud Monitoring</span>
+                        <span class="tc-tag">GPS &amp; Fleet</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  VALUES                                                       -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="values-section">
+    <div class="values-container">
+        <div class="values-header">
+            <span class="section-label">What Drives Us</span>
+            <h2 class="values-title">Our values, in plain language</h2>
+        </div>
+
+        <div class="values-grid">
+
+            <div class="value-card">
+                <div class="vc-number">01</div>
+                <div class="vc-icon"><i class="bi bi-shield-fill-check"></i></div>
+                <h3>Quality without compromise</h3>
+                <p>We source from certified distributors, install with precision, and test everything before we hand it over. If it isn't right, we fix it — no arguments.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="vc-number">02</div>
+                <div class="vc-icon"><i class="bi bi-book-fill"></i></div>
+                <h3>Continuous learning</h3>
+                <p>Security technology evolves fast. We stay ahead of it — whether that's a new camera protocol, a smarter IoT gateway, or a more efficient installation method. Our clients benefit directly from what we learn.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="vc-number">03</div>
+                <div class="vc-icon"><i class="bi bi-house-fill"></i></div>
+                <h3>Protection is personal</h3>
+                <p>We protect our own property, our own family, and our own business — so we know exactly what's at stake. That personal understanding shapes how we approach every single project we take on.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="vc-number">04</div>
+                <div class="vc-icon"><i class="bi bi-tags-fill"></i></div>
+                <h3>Competitive, honest pricing</h3>
+                <p>Top-tier security shouldn't be reserved for large corporations. We offer enterprise-quality installations at pricing that makes sense for individuals, small businesses, and growing companies alike.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="vc-number">05</div>
+                <div class="vc-icon"><i class="bi bi-people-fill"></i></div>
+                <h3>Client-first thinking</h3>
+                <p>We don't sell you a package — we listen to your situation, assess your space, and design a solution around your actual needs. No upselling, no unnecessary complexity.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="vc-number">06</div>
+                <div class="vc-icon"><i class="bi bi-arrow-repeat"></i></div>
+                <h3>Long-term partnership</h3>
+                <p>Installation day isn't the end of the relationship. We're available for maintenance, upgrades, and support — because a security system is only as good as the team backing it.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TIMELINE                                                     -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- <section class="timeline-section">
+    <div class="timeline-container">
+        <div class="section-header">
+            <span class="section-label">Our Journey</span>
+            <h2>How we got here</h2>
+        </div>
+
+        <div class="timeline">
+
+            <div class="tl-item tl-left">
+                <div class="tl-content">
+                    <div class="tl-year">2023</div>
+                    <h3>Cabrera Connect founded</h3>
+                    <p>Two brothers combine their hardware and software expertise to launch a security and IoT company focused on the Baja California market.</p>
+                </div>
+                <div class="tl-dot"></div>
+            </div>
+
+            <div class="tl-item tl-right">
+                <div class="tl-dot"></div>
+                <div class="tl-content">
+                    <div class="tl-year">2023</div>
+                    <h3>First commercial installations</h3>
+                    <p>Complete our first enterprise-scale CCTV and access control projects, establishing partnerships with certified Syscom distributors.</p>
+                </div>
+            </div>
+
+            <div class="tl-item tl-left">
+                <div class="tl-content">
+                    <div class="tl-year">2024</div>
+                    <h3>IoT &amp; GPS expansion</h3>
+                    <p>Expand our service offering to include full IoT sensor deployments and GPS fleet tracking solutions, serving logistics and industrial clients.</p>
+                </div>
+                <div class="tl-dot"></div>
+            </div>
+
+            <div class="tl-item tl-right">
+                <div class="tl-dot"></div>
+                <div class="tl-content">
+                    <div class="tl-year">2024</div>
+                    <h3>500+ installations milestone</h3>
+                    <p>Cross 500 completed projects across residential, commercial, and industrial sectors throughout Baja California.</p>
+                </div>
+            </div>
+
+            <div class="tl-item tl-left">
+                <div class="tl-content">
+                    <div class="tl-year">2025</div>
+                    <h3>Growing &amp; looking ahead</h3>
+                    <p>Continuing to expand our technical knowledge, our client base, and our commitment to bringing the best security technology to every project we take on.</p>
+                </div>
+                <div class="tl-dot tl-dot--active"></div>
+            </div>
+
+        </div>
+    </div>
+</section> -->
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  CTA                                                          -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="cta-section">
+    <div class="cta-container">
+        <div class="cta-content">
+            <h2>Ready to work with <span class="cta-highlight">us</span>?</h2>
+            <p>Whether you need a single camera or a complete security ecosystem, we'll give you an honest assessment and a fair price. Let's talk.</p>
+            <div class="cta-actions">
+                <a href="{% url 'contact_form' %}" class="btn btn-cta-primary">
+                    <i class="bi bi-whatsapp"></i>
+                    Request a Free Quote
+                </a>
+                <a href="{% url 'services' %}" class="btn btn-cta-secondary">
+                    <i class="bi bi-grid"></i>
+                    View Our Services
+                </a>
+            </div>
+        </div>
+        <div class="cta-stats">
+            <div class="cta-stat">
+                <div class="cta-stat-number">500+</div>
+                <div class="cta-stat-label">Installations</div>
+            </div>
+            <div class="cta-stat">
+                <div class="cta-stat-number">2+</div>
+                <div class="cta-stat-label">Years Active</div>
+            </div>
+            <div class="cta-stat">
+                <div class="cta-stat-number">100%</div>
+                <div class="cta-stat-label">Local Team</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -14,6 +14,14 @@ class Invoice(models.Model):
         ('transfer', 'Transferencia bancaria'),
     ]
 
+    PROPERTY=[
+        ('residential', 'Residencial'),
+        ('commercial',  'Commercial'),
+        ('industrial',  'Industrial'),
+        ('government',  'Govierno / Institucional'),
+        ('other',       'Otro'),
+    ]
+
     # Selling information
     title = models.CharField(max_length=128)
     folio = models.CharField(max_length=20, unique=True, blank=True)  # Auto-generated folio
@@ -33,13 +41,18 @@ class Invoice(models.Model):
     comments = models.TextField(blank=True, null=True)
     currency = models.CharField(max_length=16, choices=CURRENCY, default='MXN')
     payment_method = models.CharField(max_length=16, choices=PAY_METHOD, default='cash')
+    property = models.CharField(max_length=16, choices=PROPERTY, default='residential' )
     tax_rate = models.DecimalField(decimal_places=2, max_digits=5, default=16.00)
     exchange_rate = models.DecimalField(decimal_places=2, max_digits=10, default=18)
     warranty_months = models.IntegerField(default=0)
 
+
     # Products information (stored as JSON)
     products = JSONField(default=list)  # Stores all product details directly
     
+    # Audit Trail
+    audit_trail = JSONField(default=list)  # Stores all product details directly
+
     # Calculated totals
     subtotal = models.DecimalField(decimal_places=2, max_digits=10, default=0)
     total_discount = models.DecimalField(decimal_places=2, max_digits=10, default=0)

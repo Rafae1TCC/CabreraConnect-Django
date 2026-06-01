@@ -1,0 +1,886 @@
+{% extends 'inv-base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Analytics Dashboard — Cabrera Connect{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/invoice-styles.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ── Dashboard layout ──────────────────────────────────────────── */
+.db-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+.db-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.db-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* ── KPI cards ─────────────────────────────────────────────────── */
+.kpi-card {
+    border-radius: 12px;
+    padding: 1.6rem 1.75rem;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.kpi-card:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.18); }
+.kpi-card::after {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+}
+.kpi-card.gold    { background: linear-gradient(135deg, #ffcc00 0%, #e6a800 100%); color: #1a1a1a; }
+.kpi-card.green   { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); }
+.kpi-card.blue    { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+.kpi-card.purple  { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+.kpi-card.orange  { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
+
+.kpi-icon {
+    font-size: 1.4rem;
+    opacity: 0.85;
+    margin-bottom: 0.25rem;
+}
+.kpi-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+.kpi-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    opacity: 0.8;
+}
+.kpi-sub {
+    font-size: 0.78rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+}
+
+/* ── Chart / table cards ───────────────────────────────────────── */
+.db-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.db-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.10); }
+
+.db-card-header {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: #fafafa;
+}
+.db-card-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.db-card-title i { color: #ffcc00; font-size: 1rem; }
+.db-card-meta {
+    font-size: 0.75rem;
+    color: #999;
+    font-weight: 500;
+}
+.db-card-body { padding: 1.25rem 1.5rem; }
+.db-card-body.no-pad { padding: 0; }
+
+/* ── Filter bar ────────────────────────────────────────────────── */
+.db-filter-bar {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e5e5e5;
+    padding: 1.1rem 1.5rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.db-filter-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #888;
+    white-space: nowrap;
+}
+.db-filter-select {
+    padding: 0.5rem 2rem 0.5rem 0.85rem;
+    border: 1.5px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+.db-filter-select:focus { outline: none; border-color: #ffcc00; box-shadow: 0 0 0 3px rgba(255,204,0,0.12); }
+.db-filter-sep { width: 1px; height: 24px; background: #e5e5e5; flex-shrink: 0; }
+.db-filter-btn {
+    padding: 0.5rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    letter-spacing: 0.3px;
+}
+.db-filter-btn.primary { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.db-filter-btn.primary:hover { background: #333; transform: translateY(-1px); }
+.db-filter-btn.ghost  { background: transparent; color: #666; border-color: #e5e5e5; }
+.db-filter-btn.ghost:hover { background: #f5f5f5; color: #1a1a1a; }
+
+/* ── Mini table ────────────────────────────────────────────────── */
+.db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.db-table thead th {
+    padding: 0.65rem 1rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #888;
+    background: #f8f8f8;
+    border-bottom: 1px solid #f0f0f0;
+    white-space: nowrap;
+}
+.db-table tbody td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f5f5f5;
+    color: #333;
+    vertical-align: middle;
+}
+.db-table tbody tr:last-child td { border-bottom: none; }
+.db-table tbody tr:hover { background: #fafafa; }
+.db-table .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.db-table .muted { color: #999; font-size: 0.8rem; }
+
+/* ── Rank pill ─────────────────────────────────────────────────── */
+.rank {
+    display: inline-flex;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #f0f0f0;
+    color: #666;
+    flex-shrink: 0;
+}
+.rank.gold   { background: #ffcc00; color: #1a1a1a; }
+.rank.silver { background: #d1d5db; color: #374151; }
+.rank.bronze { background: #d97706; color: #fff; }
+
+/* ── Badge ─────────────────────────────────────────────────────── */
+.db-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.db-badge.green  { background: #dcfce7; color: #15803d; }
+.db-badge.blue   { background: #dbeafe; color: #1d4ed8; }
+.db-badge.yellow { background: #fef9c3; color: #92400e; }
+.db-badge.gray   { background: #f3f4f6; color: #4b5563; }
+.db-badge.purple { background: #ede9fe; color: #6d28d9; }
+
+/* ── Progress bar ──────────────────────────────────────────────── */
+.db-bar-wrap { display: flex; align-items: center; gap: 0.6rem; }
+.db-bar-track { flex: 1; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; min-width: 60px; }
+.db-bar-fill  { height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, #ffcc00, #e6a800); transition: width 0.6s ease; }
+.db-bar-pct   { font-size: 0.75rem; font-weight: 700; color: #888; white-space: nowrap; min-width: 36px; text-align: right; }
+
+/* ── Section divider ───────────────────────────────────────────── */
+.db-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #aaa;
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.db-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #f0f0f0;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .db-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .db-grid-3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 720px) {
+    .db-grid-4, .db-grid-2, .db-grid-3 { grid-template-columns: 1fr; }
+    .db-filter-bar { gap: 0.75rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem;">
+
+    <!-- ── Page header ──────────────────────────────────────────── -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Analytics Dashboard</h1>
+            <p class="page-subtitle">Sales metrics and business intelligence</p>
+        </div>
+        <div style="text-align:right; color:#888; font-size:0.85rem;">
+            <div style="font-weight:700; color:#1a1a1a; font-size:1rem;">
+                {% now "F j, Y" %}
+            </div>
+            <div>Data refreshes on page load</div>
+        </div>
+    </div>
+
+    <!-- ── Filters ──────────────────────────────────────────────── -->
+    <form method="get">
+        <div class="db-filter-bar">
+            <span class="db-filter-label">Date range</span>
+            <select name="date_range" class="db-filter-select">
+                <option value="week"  {% if date_range == 'week'  %}selected{% endif %}>Last 7 days</option>
+                <option value="month" {% if date_range == 'month' %}selected{% endif %}>Last 30 days</option>
+                <option value="year"  {% if date_range == 'year'  %}selected{% endif %}>Last 365 days</option>
+                <option value="all"   {% if date_range == 'all'   %}selected{% endif %}>All time</option>
+            </select>
+            <div class="db-filter-sep"></div>
+            <span class="db-filter-label">Property</span>
+            <select name="property" class="db-filter-select">
+                <option value="">All properties</option>
+                {% for value, label in property_choices %}
+                    <option value="{{ value }}" {% if property_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <div class="db-filter-sep"></div>
+            <button type="submit" class="db-filter-btn primary">
+                <i class="fas fa-filter"></i> Apply
+            </button>
+            {% if property_filter or date_range != 'year' %}
+                <a href="{% url 'dashboard' %}" class="db-filter-btn ghost">
+                    <i class="fas fa-times"></i> Reset
+                </a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- ── KPI row ───────────────────────────────────────────────── -->
+    <div class="db-grid-4">
+        <div class="kpi-card gold">
+            <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="kpi-value">${{ total_revenue|floatformat:2|intcomma }}</div>
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-sub">{{ total_invoices }} invoice{{ total_invoices|pluralize }}</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-icon"><i class="fas fa-file-invoice"></i></div>
+            <div class="kpi-value">{{ total_invoices }}</div>
+            <div class="kpi-label">Total Invoices</div>
+            <div class="kpi-sub">Selected period</div>
+        </div>
+        <div class="kpi-card blue">
+            <div class="kpi-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="kpi-value">${{ avg_invoice_value|floatformat:2|intcomma }}</div>
+            <div class="kpi-label">Avg Invoice Value</div>
+            <div class="kpi-sub">Per invoice</div>
+        </div>
+        <div class="kpi-card purple">
+            <div class="kpi-icon"><i class="fas fa-users"></i></div>
+            <div class="kpi-value">{{ unique_clients }}</div>
+            <div class="kpi-label">Unique Clients</div>
+            <div class="kpi-sub">By email address</div>
+        </div>
+    </div>
+
+    <!-- ── Monthly trend (full width) ──────────────────────────── -->
+    <div class="db-section-title">Revenue Trends</div>
+    <div class="db-card" style="margin-bottom:1.5rem;">
+        <div class="db-card-header">
+            <span class="db-card-title"><i class="fas fa-chart-line"></i> Monthly Revenue</span>
+            <span class="db-card-meta">Last 12 months</span>
+        </div>
+        <div class="db-card-body">
+            <canvas id="monthlyChart" style="max-height:280px;"></canvas>
+        </div>
+    </div>
+
+    <!-- ── Daily + Payment side by side ────────────────────────── -->
+    <div class="db-grid-2">
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-chart-bar"></i> Daily Revenue</span>
+                <span class="db-card-meta">Last 30 days</span>
+            </div>
+            <div class="db-card-body">
+                <canvas id="dailyChart" style="max-height:240px;"></canvas>
+            </div>
+        </div>
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-credit-card"></i> Payment Methods</span>
+                <span class="db-card-meta">Revenue share</span>
+            </div>
+            <div class="db-card-body" style="display:flex;align-items:center;justify-content:center;">
+                <canvas id="paymentChart" style="max-height:240px;max-width:300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Property breakdown + currency ───────────────────────── -->
+    <div class="db-grid-2">
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-building"></i> Sales by Property Type</span>
+                <span class="db-card-meta">Revenue share</span>
+            </div>
+            <div class="db-card-body" style="display:flex;align-items:center;justify-content:center;">
+                <canvas id="propertyChart" style="max-height:240px;max-width:300px;"></canvas>
+            </div>
+        </div>
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-coins"></i> Property Type Breakdown</span>
+                <span class="db-card-meta">Count &amp; revenue</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th class="num">Invoices</th>
+                            <th class="num">Revenue</th>
+                            <th style="width:140px;">Share</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prop in property_table %}
+                        <tr>
+                            <td>
+                                <span class="db-badge
+                                    {% if prop.type == 'residential' %}green
+                                    {% elif prop.type == 'commercial' %}blue
+                                    {% elif prop.type == 'industrial' %}purple
+                                    {% elif prop.type == 'government' %}yellow
+                                    {% else %}gray{% endif %}">
+                                    {{ prop.label }}
+                                </span>
+                            </td>
+                            <td class="num">{{ prop.count }}</td>
+                            <td class="num">${{ prop.total|floatformat:2|intcomma }}</td>
+                            <td>
+                                <div class="db-bar-wrap">
+                                    <div class="db-bar-track">
+                                        <div class="db-bar-fill" data-pct="{{ prop.pct }}"></div>
+                                    </div>
+                                    <span class="db-bar-pct">{{ prop.pct }}%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="muted" style="padding:1.5rem;text-align:center;">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Top clients + top sellers ───────────────────────────── -->
+    <div class="db-section-title">People</div>
+    <div class="db-grid-2">
+        <!-- Top clients -->
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-user-tie"></i> Top Clients by Revenue</span>
+                <span class="db-card-meta">Top 10</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Client</th>
+                            <th class="num">Invoices</th>
+                            <th class="num">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for client in top_clients %}
+                        <tr>
+                            <td>
+                                <span class="rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+                                    {{ forloop.counter }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="font-weight:600;font-size:0.85rem;">{{ client.clt_name }}</div>
+                                <div class="muted">{{ client.clt_email }}</div>
+                            </td>
+                            <td class="num">{{ client.invoice_count }}</td>
+                            <td class="num">${{ client.total_spent|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="padding:1.5rem;text-align:center;color:#aaa;">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Top sellers -->
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-star"></i> Top Sellers by Revenue</span>
+                <span class="db-card-meta">Top 10</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Seller</th>
+                            <th class="num">Invoices</th>
+                            <th class="num">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for seller in top_sellers %}
+                        <tr>
+                            <td>
+                                <span class="rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+                                    {{ forloop.counter }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="font-weight:600;font-size:0.85rem;">{{ seller.sell_name }}</div>
+                                <div class="muted">{{ seller.sell_email }}</div>
+                            </td>
+                            <td class="num">{{ seller.invoice_count }}</td>
+                            <td class="num">${{ seller.total_sales|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="padding:1.5rem;text-align:center;color:#aaa;">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Product performance ──────────────────────────────────── -->
+    <div class="db-section-title">Products</div>
+    <div class="db-grid-2">
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-box"></i> Most Sold Products</span>
+                <span class="db-card-meta">By units sold</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th class="num">Units</th>
+                            <th class="num">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in top_products_qty %}
+                        <tr>
+                            <td>
+                                <span class="rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+                                    {{ forloop.counter }}
+                                </span>
+                            </td>
+                            <td style="font-weight:600;font-size:0.85rem;">{{ p.name }}</td>
+                            <td class="num">{{ p.total_qty }}</td>
+                            <td class="num">${{ p.total_rev|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="padding:1.5rem;text-align:center;color:#aaa;">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-trophy"></i> Highest Revenue Products</span>
+                <span class="db-card-meta">By total revenue</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th class="num">Units</th>
+                            <th class="num">Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in top_products_rev %}
+                        <tr>
+                            <td>
+                                <span class="rank {% if forloop.counter == 1 %}gold{% elif forloop.counter == 2 %}silver{% elif forloop.counter == 3 %}bronze{% endif %}">
+                                    {{ forloop.counter }}
+                                </span>
+                            </td>
+                            <td style="font-weight:600;font-size:0.85rem;">{{ p.name }}</td>
+                            <td class="num">{{ p.total_qty }}</td>
+                            <td class="num">${{ p.total_rev|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="padding:1.5rem;text-align:center;color:#aaa;">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Currency & payment summary ──────────────────────────── -->
+    <div class="db-section-title">Finance</div>
+    <div class="db-grid-3">
+        <!-- Currency breakdown -->
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-exchange-alt"></i> Currency Split</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr><th>Currency</th><th class="num">Invoices</th><th class="num">Revenue</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for c in currency_stats %}
+                        <tr>
+                            <td><span class="db-badge {% if c.currency == 'MXN' %}green{% else %}blue{% endif %}">{{ c.currency }}</span></td>
+                            <td class="num">{{ c.count }}</td>
+                            <td class="num">${{ c.total|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" style="padding:1.5rem;text-align:center;color:#aaa;">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment method detail -->
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-wallet"></i> Payment Methods</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr><th>Method</th><th class="num">Invoices</th><th class="num">Revenue</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for pm in payment_table %}
+                        <tr>
+                            <td><span class="db-badge {% if pm.method == 'cash' %}green{% elif pm.method == 'card' %}blue{% else %}purple{% endif %}">{{ pm.label }}</span></td>
+                            <td class="num">{{ pm.count }}</td>
+                            <td class="num">${{ pm.total|floatformat:2|intcomma }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" style="padding:1.5rem;text-align:center;color:#aaa;">No data</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tax collected -->
+        <div class="db-card">
+            <div class="db-card-header">
+                <span class="db-card-title"><i class="fas fa-receipt"></i> Tax Summary</span>
+            </div>
+            <div class="db-card-body no-pad">
+                <table class="db-table">
+                    <thead>
+                        <tr><th>Metric</th><th class="num">Amount</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Subtotal (pre-tax)</td>
+                            <td class="num">${{ tax_summary.subtotal|floatformat:2|intcomma }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Discounts</td>
+                            <td class="num" style="color:#dc2626;">−${{ tax_summary.discounts|floatformat:2|intcomma }}</td>
+                        </tr>
+                        <tr>
+                            <td>Tax Collected (IVA)</td>
+                            <td class="num" style="color:#2563eb;">${{ tax_summary.tax|floatformat:2|intcomma }}</td>
+                        </tr>
+                        <tr style="font-weight:700;border-top:2px solid #f0f0f0;">
+                            <td>Net Revenue</td>
+                            <td class="num" style="color:#15803d;">${{ tax_summary.net|floatformat:2|intcomma }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Recent invoices ──────────────────────────────────────── -->
+    <div class="db-section-title">Recent Activity</div>
+    <div class="db-card" style="margin-bottom:3rem;">
+        <div class="db-card-header">
+            <span class="db-card-title"><i class="fas fa-clock"></i> Recent Invoices</span>
+            <a href="{% url 'inv_list' %}" class="db-filter-btn ghost" style="font-size:0.78rem;">View all →</a>
+        </div>
+        <div class="db-card-body no-pad">
+            <table class="db-table">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Seller</th>
+                        <th>Property</th>
+                        <th>Payment</th>
+                        <th class="num">Discount</th>
+                        <th class="num">Tax</th>
+                        <th class="num">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in recent_invoices %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'inv_edit' inv.id %}" style="color:#1a1a1a;font-weight:700;text-decoration:none;">
+                                {{ inv.folio }}
+                            </a>
+                        </td>
+                        <td class="muted">{{ inv.date|date:"M d, Y" }}</td>
+                        <td>
+                            <div style="font-weight:600;font-size:0.83rem;">{{ inv.clt_name }}</div>
+                        </td>
+                        <td class="muted">{{ inv.sell_name }}</td>
+                        <td>
+                            <span class="db-badge
+                                {% if inv.property == 'residential' %}green
+                                {% elif inv.property == 'commercial' %}blue
+                                {% elif inv.property == 'industrial' %}purple
+                                {% elif inv.property == 'government' %}yellow
+                                {% else %}gray{% endif %}">
+                                {{ inv.get_property_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="db-badge
+                                {% if inv.payment_method == 'cash' %}green
+                                {% elif inv.payment_method == 'card' %}blue
+                                {% else %}purple{% endif %}">
+                                {{ inv.get_payment_method_display }}
+                            </span>
+                        </td>
+                        <td class="num" style="color:#dc2626;">−${{ inv.total_discount|floatformat:2|intcomma }}</td>
+                        <td class="num" style="color:#2563eb;">${{ inv.total_tax|floatformat:2|intcomma }}</td>
+                        <td class="num" style="font-weight:700;">${{ inv.total|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="padding:2rem;text-align:center;color:#aaa;">No invoices found for the selected period.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const GOLD   = '#ffcc00';
+    const GOLD2  = '#e6a800';
+    const COLORS = ['#ffcc00','#22c55e','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#ec4899'];
+
+    const defaultOpts = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+    };
+
+    function money(v) { return '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+    function safeParse(raw, fallback) {
+        try { const p = JSON.parse(raw); return (Array.isArray(p) && p.length) ? p : fallback; }
+        catch(e) { return fallback; }
+    }
+
+    // ── Monthly line chart ──────────────────────────────────────
+    const monthlyLabels = safeParse('{{ monthly_labels|safe|escapejs }}', ['No data']);
+    const monthlyTotals = safeParse('{{ monthly_totals|safe|escapejs }}', [0]);
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyLabels,
+            datasets: [{
+                label: 'Revenue',
+                data: monthlyTotals,
+                borderColor: GOLD,
+                backgroundColor: 'rgba(255,204,0,0.08)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: GOLD,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2.5,
+            }]
+        },
+        options: {
+            ...defaultOpts,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => money(ctx.raw) } }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                y: { grid: { color: '#f5f5f5' }, ticks: { callback: v => '$' + Number(v).toLocaleString(), font: { size: 11 } } }
+            }
+        }
+    });
+
+    // ── Daily bar chart ─────────────────────────────────────────
+    const dailyLabels = safeParse('{{ daily_labels|safe|escapejs }}', ['No data']);
+    const dailyTotals = safeParse('{{ daily_totals|safe|escapejs }}', [0]);
+
+    new Chart(document.getElementById('dailyChart'), {
+        type: 'bar',
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: 'Revenue',
+                data: dailyTotals,
+                backgroundColor: 'rgba(59,130,246,0.75)',
+                borderRadius: 5,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            ...defaultOpts,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => money(ctx.raw) } }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 45 } },
+                y: { grid: { color: '#f5f5f5' }, ticks: { callback: v => '$' + Number(v).toLocaleString(), font: { size: 11 } } }
+            }
+        }
+    });
+
+    // ── Payment doughnut ────────────────────────────────────────
+    const paymentLabels = safeParse('{{ payment_labels|safe|escapejs }}', ['No data']);
+    const paymentTotals = safeParse('{{ payment_totals|safe|escapejs }}', [0]);
+
+    new Chart(document.getElementById('paymentChart'), {
+        type: 'doughnut',
+        data: {
+            labels: paymentLabels,
+            datasets: [{ data: paymentTotals, backgroundColor: COLORS, borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+            ...defaultOpts,
+            cutout: '60%',
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { font: { size: 11 }, padding: 12, boxWidth: 12 } },
+                tooltip: { callbacks: { label: ctx => ctx.label + ': ' + money(ctx.raw) } }
+            }
+        }
+    });
+
+    // ── Property pie chart ──────────────────────────────────────
+    const propLabels = safeParse('{{ property_labels|safe|escapejs }}', ['No data']);
+    const propTotals = safeParse('{{ property_totals|safe|escapejs }}', [0]);
+
+    new Chart(document.getElementById('propertyChart'), {
+        type: 'doughnut',
+        data: {
+            labels: propLabels,
+            datasets: [{ data: propTotals, backgroundColor: COLORS, borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+            ...defaultOpts,
+            cutout: '60%',
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { font: { size: 11 }, padding: 12, boxWidth: 12 } },
+                tooltip: { callbacks: { label: ctx => ctx.label + ': ' + money(ctx.raw) } }
+            }
+        }
+    });
+    // ── Progress bars ───────────────────────────────────────────
+    document.querySelectorAll('.db-bar-fill[data-pct]').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+    });
+});
+</script>
+{% endblock %}

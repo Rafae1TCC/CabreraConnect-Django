@@ -1,14 +1,182 @@
 {% extends 'inv-base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Edit Invoice - Cabrera Connect{% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/invoice-styles.css' %}">
+<style>
+    /* ── Alerts ─────────────────────────────────────────────────── */
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.75rem;
+        animation: slideIn 0.3s ease;
+        font-size: 0.9rem;
+    }
+    @keyframes slideIn {
+        from { transform: translateY(-12px); opacity: 0; }
+        to   { transform: translateY(0);     opacity: 1; }
+    }
+    .alert-danger  { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    .alert ul      { margin: 0.5rem 0 0 1.25rem; padding: 0; }
+    .alert ul li   { margin-bottom: 0.2rem; }
+    .close-alert {
+        background: none; border: none; font-size: 1.1rem;
+        cursor: pointer; color: inherit; opacity: 0.6; flex-shrink: 0;
+        padding: 0; line-height: 1;
+    }
+    .close-alert:hover { opacity: 1; }
+    .error-message { color: #dc2626; font-size: 0.78rem; margin-top: 0.25rem; display: block; }
+
+    /* ── Audit trail ─────────────────────────────────────────────── */
+    .audit-section { margin-top: 2.5rem; }
+
+    .audit-trail {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        position: relative;
+    }
+    /* Vertical spine */
+    .audit-trail::before {
+        content: '';
+        position: absolute;
+        top: 0; bottom: 0;
+        left: 19px;
+        width: 2px;
+        background: #e5e5e5;
+        border-radius: 2px;
+    }
+
+    .audit-entry {
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 0 1rem;
+        padding-bottom: 1.5rem;
+        position: relative;
+    }
+    .audit-entry:last-child { padding-bottom: 0; }
+
+    /* Dot on the spine */
+    .audit-dot {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        margin-top: 4px;
+        justify-self: center;
+        position: relative;
+        z-index: 1;
+        flex-shrink: 0;
+    }
+    .audit-dot.created { background: #22c55e; box-shadow: 0 0 0 3px #dcfce7; }
+    .audit-dot.edited  { background: #3b82f6; box-shadow: 0 0 0 3px #dbeafe; }
+
+    .audit-body {
+        background: #ffffff;
+        border: 1px solid #e8e8e8;
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        font-size: 0.88rem;
+    }
+
+    .audit-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .audit-event-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 0.2rem 0.65rem;
+        border-radius: 50px;
+    }
+    .audit-event-badge.created { background: #dcfce7; color: #166534; }
+    .audit-event-badge.edited  { background: #dbeafe; color: #1d4ed8; }
+
+    .audit-meta {
+        font-size: 0.78rem;
+        color: #888;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .audit-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+    .audit-note {
+        color: #555;
+        margin-top: 0.35rem;
+        font-style: italic;
+    }
+
+    /* Change table */
+    .audit-changes {
+        margin-top: 0.75rem;
+        border: 1px solid #f0f0f0;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .audit-changes-header {
+        background: #f8f8f8;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .audit-change-row {
+        display: grid;
+        grid-template-columns: 160px 1fr 1fr;
+        border-top: 1px solid #f0f0f0;
+        font-size: 0.82rem;
+    }
+    .audit-change-row:first-of-type { border-top: none; }
+    .audit-change-cell {
+        padding: 0.5rem 0.75rem;
+        border-right: 1px solid #f0f0f0;
+        word-break: break-word;
+    }
+    .audit-change-cell:last-child { border-right: none; }
+    .audit-change-cell.field-name { font-weight: 600; color: #444; background: #fafafa; }
+    .audit-change-cell.from-val   { color: #dc2626; }
+    .audit-change-cell.to-val     { color: #16a34a; }
+
+    .audit-no-changes {
+        margin-top: 0.5rem;
+        font-size: 0.82rem;
+        color: #aaa;
+        font-style: italic;
+    }
+
+    .audit-empty {
+        text-align: center;
+        padding: 2rem;
+        color: #aaa;
+        font-size: 0.9rem;
+        border: 1px dashed #e5e5e5;
+        border-radius: 10px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
+
     <!-- Page Header -->
     <div class="page-header">
         <div>
@@ -21,28 +189,39 @@
         </div>
     </div>
 
-    <!-- Display form errors at the top -->
+    <!-- Django messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <span>{{ message }}</span>
+            <button type="button" class="close-alert" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Form-level errors -->
     {% if form.errors %}
     <div class="alert alert-danger">
-        <strong>Please fix the following errors:</strong>
-        <ul>
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                    <li>{{ field|title }}: {{ error }}</li>
+        <div>
+            <strong>Please fix the following errors before saving:</strong>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field|title|cut:"_" }}: {{ error }}</li>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </ul>
+            </ul>
+        </div>
+        <button type="button" class="close-alert" onclick="this.parentElement.remove()">×</button>
     </div>
     {% endif %}
 
     <!-- Main Form -->
     <form method="post" action="{% url 'inv_edit' invoice.id %}" id="invoiceForm">
         {% csrf_token %}
-        
-        <!-- Include the hidden products_json field -->
         {{ form.products_json }}
-        
-        <!-- Invoice Details Section -->
+
+        <!-- Invoice Details -->
         <div class="form-section">
             <div class="section-header">
                 <h3 class="section-title">Invoice Information</h3>
@@ -50,51 +229,52 @@
             <div class="section-content">
                 <div class="form-row">
                     {% for field in form %}
-                        {% if field.name != 'products_json' %}  {# Skip the hidden products field #}
+                        {% if field.name != 'products_json' %}
                         <div class="form-group">
                             <label class="form-label" for="{{ field.id_for_label }}">
                                 {{ field.label }}
+                                {% if field.field.required %}<span style="color:#dc2626">*</span>{% endif %}
                             </label>
-                            
+
                             {% if field.name == 'currency' or field.name == 'payment_method' %}
-                                {# Select fields #}
                                 <select name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}">
                                     {% for value, label in field.field.choices %}
-                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>
-                                            {{ label }}
-                                        </option>
+                                        <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
                                     {% endfor %}
                                 </select>
-                            
+
                             {% elif field.name == 'comments' %}
-                                {# Textarea field #}
-                                <textarea name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}" 
-                                          placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}" 
+                                <textarea name="{{ field.name }}" class="form-control" id="{{ field.id_for_label }}"
+                                          placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
                                           rows="3">{{ field.value|default:'' }}</textarea>
-                            
+
                             {% elif field.name == 'date' %}
-                                {# Date field with proper format #}
-                                <input type="date" 
-                                       name="{{ field.name }}" 
-                                       class="form-control" 
+                                <input type="date" name="{{ field.name }}" class="form-control"
                                        id="{{ field.id_for_label }}"
                                        value="{{ field.value|date:'Y-m-d' }}"
                                        pattern="\d{4}-\d{2}-\d{2}">
-                            
+
                             {% else %}
-                                {# Regular input fields #}
-                                <input type="{{ field.field.widget.input_type|default:'text' }}" 
-                                       name="{{ field.name }}" 
-                                       class="form-control" 
+                                <input type="{{ field.field.widget.input_type|default:'text' }}"
+                                       name="{{ field.name }}" class="form-control"
                                        id="{{ field.id_for_label }}"
                                        value="{{ field.value|default:'' }}"
                                        placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
-                                       {% if field.field.widget.attrs.step %}step="{{ field.field.widget.attrs.step }}"{% endif %}>
+                                       {% if field.field.widget.attrs.step %}step="{{ field.field.widget.attrs.step }}"{% endif %}
+                                       {% if field.field.required %}required{% endif %}>
                             {% endif %}
-                            
+
+                                <label class="form-label" for="{{ form.property.id_for_label }}">
+                                    Property Type
+                                </label>
+                                {{ form.property }}
+                                {% if form.property.errors %}
+                                    <div class="error-message">{{ form.property.errors.0 }}</div>
+                                {% endif %}
+
                             {% if field.errors %}
                                 {% for error in field.errors %}
-                                    <div class="alert alert-danger">{{ error }}</div>
+                                    <span class="error-message">{{ error }}</span>
                                 {% endfor %}
                             {% endif %}
                         </div>
@@ -104,7 +284,7 @@
             </div>
         </div>
 
-        <!-- Products Section -->
+        <!-- Products -->
         <div class="form-section">
             <div class="section-header">
                 <h3 class="section-title">Products & Services</h3>
@@ -114,92 +294,51 @@
                     <table class="table table-bordered" id="productsTable">
                         <thead>
                             <tr>
-                                <th>Product/Service</th>
-                                <th>Quantity</th>
+                                <th>Product/Service <span style="color:#dc2626">*</span></th>
+                                <th>Quantity <span style="color:#dc2626">*</span></th>
                                 <th>Discount (%)</th>
-                                <th>Unit Price</th>
+                                <th>Unit Price <span style="color:#dc2626">*</span></th>
                                 <th>Total</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="productsBody">
-                            {% for product in invoice.products %}
-                            <tr class="product-row fade-in">
-                                <td>
-                                    <input type="text" 
-                                           class="form-control" 
-                                           name="product_name" 
-                                           value="{{ product.name }}"
-                                           placeholder="Enter product or service name"
-                                           required>
-                                </td>
-                                <td>
-                                    <input type="number" 
-                                           class="form-control quantity-input" 
-                                           name="quantity" 
-                                           value="{{ product.quantity }}" 
-                                           min="1"
-                                           required>
-                                </td>
-                                <td>
-                                    <input type="number" 
-                                           class="form-control discount-input" 
-                                           name="discount" 
-                                           value="{{ product.discount_percent }}" 
-                                           min="0" 
-                                           max="100"
-                                           step="0.01">
-                                </td>
-                                <td>
-                                    <input type="number" 
-                                           class="form-control price-input" 
-                                           name="price" 
-                                           value="{{ product.price }}" 
-                                           step="0.01"
-                                           min="0"
-                                           required>
-                                </td>
-                                <td>
-                                    <span class="row-total">$0.00</span>
-                                </td>
-                                <td>
-                                    <button type="button" 
-                                            class="btn btn-danger btn-sm deleteRow" 
-                                            title="Remove this product">
-                                            Delete
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
+                            {% if submitted_products %}
+                                {% for product in submitted_products %}
+                                <tr class="product-row">
+                                    <td><input type="text" class="form-control" name="product_name" value="{{ product.name }}" placeholder="Product or service name" required></td>
+                                    <td><input type="number" class="form-control quantity-input" name="quantity" value="{{ product.quantity }}" min="1" required></td>
+                                    <td><input type="number" class="form-control discount-input" name="discount" value="{{ product.discount_percent|default:'0' }}" min="0" max="100" step="0.01"></td>
+                                    <td><input type="number" class="form-control price-input" name="price" value="{{ product.price }}" step="0.01" min="0" required></td>
+                                    <td><span class="row-total">$0.00</span></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm deleteRow">Delete</button></td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr class="product-row">
+                                    <td><input type="text" class="form-control" name="product_name" placeholder="Product or service name" required></td>
+                                    <td><input type="number" class="form-control quantity-input" name="quantity" value="1" min="1" required></td>
+                                    <td><input type="number" class="form-control discount-input" name="discount" value="0" min="0" max="100" step="0.01"></td>
+                                    <td><input type="number" class="form-control price-input" name="price" value="0" step="0.01" min="0" required></td>
+                                    <td><span class="row-total">$0.00</span></td>
+                                    <td><button type="button" class="btn btn-danger btn-sm deleteRow">Delete</button></td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
-                
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="addProduct">
-                        Add Another Product
-                    </button>
+                    <button type="button" class="btn btn-secondary" id="addProduct">+ Add Another Product</button>
                 </div>
 
-                <!-- Totals Summary -->
-                <div class="form-row" style="margin-top: 2rem;">
+                <div class="form-row" style="margin-top:2rem;">
+                    <div class="form-group"><!-- spacer --></div>
                     <div class="form-group">
-                        <!-- Spacer -->
-                    </div>
-                    <div class="form-group">
-                        <div class="totals-summary" style="background: #f8f8f8; padding: 1.5rem; border-radius: 8px;">
-                            <div class="total-row">
-                                <span>Subtotal:</span>
-                                <span id="subtotal">$0.00</span>
-                            </div>
-                            <div class="total-row">
-                                <span>Total Discount:</span>
-                                <span id="totalDiscount">$0.00</span>
-                            </div>
-                            <div class="total-row final">
-                                <span>Total Amount:</span>
-                                <span id="grandTotal">$0.00</span>
-                            </div>
+                        <div class="totals-summary" style="background:#f8f8f8;padding:1.5rem;border-radius:8px;">
+                            <div class="total-row"><span>Subtotal:</span><span id="subtotal">$0.00</span></div>
+                            <div class="total-row"><span>Total Discount:</span><span id="totalDiscount">$0.00</span></div>
+                            <div class="total-row final"><span>Total Amount:</span><span id="grandTotal">$0.00</span></div>
                         </div>
                     </div>
                 </div>
@@ -208,209 +347,206 @@
 
         <!-- Form Actions -->
         <div class="form-actions">
-            <a href="{% url 'inv_list' %}" class="btn btn-secondary">
-                Cancel
-            </a>
-            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                Update Invoice
-            </button>
+            <a href="{% url 'inv_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">Update Invoice</button>
         </div>
     </form>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  AUDIT TRAIL                                               -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div class="form-section audit-section">
+        <div class="section-header">
+            <h3 class="section-title">Audit Trail</h3>
+        </div>
+        <div class="section-content">
+
+            {% if audit_trail %}
+            <div class="audit-trail">
+                {% for entry in audit_trail reversed %}
+                <div class="audit-entry">
+
+                    <!-- Spine dot -->
+                    <div class="audit-dot {{ entry.event }}"></div>
+
+                    <!-- Entry body -->
+                    <div class="audit-body">
+                        <div class="audit-header">
+                            <span class="audit-event-badge {{ entry.event }}">
+                                {% if entry.event == 'created' %}
+                                    ✦ Created
+                                {% else %}
+                                    ✎ Edited
+                                {% endif %}
+                            </span>
+                            <div class="audit-meta">
+                                <span>👤 {{ entry.actor }}</span>
+                                <span>🕒 {{ entry.timestamp }}</span>
+                            </div>
+                        </div>
+
+                        {% if entry.note %}
+                            <p class="audit-note">{{ entry.note }}</p>
+                        {% endif %}
+
+                        {% if entry.changes %}
+                            <div class="audit-changes">
+                                <div class="audit-changes-header">
+                                    {{ entry.changes|length }} field{{ entry.changes|length|pluralize }} changed
+                                </div>
+                                <div class="audit-change-row" style="background:#f8f8f8;font-weight:700;font-size:0.75rem;color:#888;text-transform:uppercase;letter-spacing:.5px;">
+                                    <div class="audit-change-cell">Field</div>
+                                    <div class="audit-change-cell">Before</div>
+                                    <div class="audit-change-cell">After</div>
+                                </div>
+                                {% for change in entry.changes %}
+                                <div class="audit-change-row">
+                                    <div class="audit-change-cell field-name">{{ change.field }}</div>
+                                    <div class="audit-change-cell from-val">{{ change.from }}</div>
+                                    <div class="audit-change-cell to-val">{{ change.to }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% elif entry.event == 'edited' %}
+                            <p class="audit-no-changes">No field changes detected.</p>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="audit-empty">
+                No audit history yet. Events will appear here once the invoice is saved.
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const productsBody = document.getElementById('productsBody');
     const addProductBtn = document.getElementById('addProduct');
-    const invoiceForm = document.getElementById('invoiceForm');
-    const productsInput = document.getElementById('id_products_json'); // Use the form's hidden field
-    
-    // Calculate totals for a row
+    const invoiceForm  = document.getElementById('invoiceForm');
+    const productsInput = document.getElementById('id_products_json');
+
     function calculateRowTotal(row) {
-        const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
-        const price = parseFloat(row.querySelector('.price-input').value) || 0;
+        const qty      = parseFloat(row.querySelector('.quantity-input').value) || 0;
+        const price    = parseFloat(row.querySelector('.price-input').value)    || 0;
         const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
-        
-        const subtotal = quantity * price;
-        const discountAmount = (subtotal * discount) / 100;
-        const total = subtotal - discountAmount;
-        
+        const sub      = qty * price;
+        const total    = sub - (sub * discount / 100);
         row.querySelector('.row-total').textContent = '$' + total.toFixed(2);
-        
         updateGrandTotal();
     }
-    
-    // Update grand total
+
     function updateGrandTotal() {
-        let subtotal = 0;
-        let totalDiscount = 0;
-        
+        let subtotal = 0, totalDiscount = 0;
         document.querySelectorAll('.product-row').forEach(row => {
-            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
-            const price = parseFloat(row.querySelector('.price-input').value) || 0;
+            const qty      = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const price    = parseFloat(row.querySelector('.price-input').value)    || 0;
             const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
-            
-            const rowSubtotal = quantity * price;
-            const rowDiscountAmount = (rowSubtotal * discount) / 100;
-            
-            subtotal += rowSubtotal;
-            totalDiscount += rowDiscountAmount;
+            const sub      = qty * price;
+            subtotal      += sub;
+            totalDiscount += sub * discount / 100;
         });
-        
-        const grandTotal = subtotal - totalDiscount;
-        
-        document.getElementById('subtotal').textContent = '$' + subtotal.toFixed(2);
-        document.getElementById('totalDiscount').textContent = '$' + totalDiscount.toFixed(2);
-        document.getElementById('grandTotal').textContent = '$' + grandTotal.toFixed(2);
+        document.getElementById('subtotal').textContent      = '$' + subtotal.toFixed(2);
+        document.getElementById('totalDiscount').textContent  = '$' + totalDiscount.toFixed(2);
+        document.getElementById('grandTotal').textContent     = '$' + (subtotal - totalDiscount).toFixed(2);
     }
-    
-    // Add event listeners to existing row
+
     function addRowListeners(row) {
-        const inputs = row.querySelectorAll('.quantity-input, .price-input, .discount-input');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => calculateRowTotal(row));
+        row.querySelectorAll('.quantity-input, .price-input, .discount-input').forEach(input => {
+            input.addEventListener('input',  () => calculateRowTotal(row));
             input.addEventListener('change', () => calculateRowTotal(row));
         });
-        
         const deleteBtn = row.querySelector('.deleteRow');
-        deleteBtn.addEventListener('click', function() {
-            if (productsBody.children.length > 1) {
-                row.remove();
-                updateGrandTotal();
-            } else {
-                alert('At least one product is required.');
-            }
-        });
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                if (productsBody.children.length > 1) {
+                    row.remove(); updateGrandTotal();
+                } else {
+                    alert('At least one product is required.');
+                }
+            });
+        }
     }
-    
-    // Add listeners to all existing rows
+
     document.querySelectorAll('.product-row').forEach(row => {
         addRowListeners(row);
-        calculateRowTotal(row); // Calculate initial totals
+        calculateRowTotal(row);
     });
-    
-    // Add new product row
-    addProductBtn.addEventListener('click', function() {
+
+    addProductBtn.addEventListener('click', () => {
         const newRow = document.createElement('tr');
-        newRow.className = 'product-row fade-in';
-        
+        newRow.className = 'product-row';
         newRow.innerHTML = `
-            <td>
-                <input type="text" 
-                       class="form-control" 
-                       name="product_name" 
-                       placeholder="Enter product or service name"
-                       required>
-            </td>
-            <td>
-                <input type="number" 
-                       class="form-control quantity-input" 
-                       name="quantity" 
-                       value="1" 
-                       min="1"
-                       required>
-            </td>
-            <td>
-                <input type="number" 
-                       class="form-control discount-input" 
-                       name="discount" 
-                       value="0" 
-                       min="0" 
-                       max="100"
-                       step="0.01">
-            </td>
-            <td>
-                <input type="number" 
-                       class="form-control price-input" 
-                       name="price" 
-                       value="0" 
-                       step="0.01"
-                       min="0"
-                       required>
-            </td>
-            <td>
-                <span class="row-total">$0.00</span>
-            </td>
-            <td>
-                <button type="button" 
-                        class="btn btn-danger btn-sm deleteRow" 
-                        title="Remove this product">
-                        Delete
-                </button>
-            </td>
+            <td><input type="text" class="form-control" name="product_name" placeholder="Product or service name" required></td>
+            <td><input type="number" class="form-control quantity-input" name="quantity" value="1" min="1" required></td>
+            <td><input type="number" class="form-control discount-input" name="discount" value="0" min="0" max="100" step="0.01"></td>
+            <td><input type="number" class="form-control price-input" name="price" value="0" step="0.01" min="0" required></td>
+            <td><span class="row-total">$0.00</span></td>
+            <td><button type="button" class="btn btn-danger btn-sm deleteRow">Delete</button></td>
         `;
-        
         productsBody.appendChild(newRow);
         addRowListeners(newRow);
-        
-        // Focus on the new product name input
         newRow.querySelector('input[name="product_name"]').focus();
     });
-    
-    // Handle form submission
-    invoiceForm.addEventListener('submit', function(e) {
+
+    invoiceForm.addEventListener('submit', function (e) {
         const products = [];
-        const rows = document.querySelectorAll('.product-row');
-        
-        let isValid = true;
-        
-        rows.forEach(row => {
-            const productName = row.querySelector('input[name="product_name"]').value.trim();
-            const quantity = row.querySelector('.quantity-input').value;
-            const discount = row.querySelector('.discount-input').value;
+        let valid = true;
+
+        document.querySelectorAll('.product-row').forEach(row => {
+            const name  = row.querySelector('input[name="product_name"]').value.trim();
+            const qty   = row.querySelector('.quantity-input').value;
             const price = row.querySelector('.price-input').value;
-            
-            if (!productName || !quantity || !price) {
-                isValid = false;
-                row.style.border = '2px solid red';
-                return;
+
+            if (!name || !qty || !price || parseFloat(price) <= 0) {
+                valid = false;
+                if (!name)               row.querySelector('input[name="product_name"]').style.borderColor = '#dc2626';
+                if (!qty)                row.querySelector('.quantity-input').style.borderColor = '#dc2626';
+                if (!price || price <= 0) row.querySelector('.price-input').style.borderColor = '#dc2626';
             } else {
-                row.style.border = '';
+                products.push({
+                    name,
+                    quantity:         parseInt(qty),
+                    discount_percent: parseFloat(row.querySelector('.discount-input').value) || 0,
+                    price:            parseFloat(price),
+                });
             }
-            
-            products.push({
-                name: productName,
-                quantity: parseInt(quantity),
-                discount_percent: parseFloat(discount),
-                price: parseFloat(price)
-            });
         });
-        
-        if (!isValid) {
+
+        if (!valid) {
             e.preventDefault();
-            alert('Please fill in all required product fields.');
+            alert('Please fill in all required product fields (Name, Quantity, and Unit Price > 0).');
             return;
         }
-        
         if (products.length === 0) {
             e.preventDefault();
             alert('At least one product is required.');
             return;
         }
-        
-        // Update the form's hidden field
+
         productsInput.value = JSON.stringify(products);
-        
-        // Show loading state
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
+
+        const btn = document.getElementById('submitBtn');
+        btn.innerHTML = 'Updating…';
+        btn.disabled  = true;
     });
-    
-    // Initial calculation
-    updateGrandTotal();
 });
 
-// Form validation
-document.addEventListener('input', function(e) {
-    if (e.target.matches('.form-control[required]')) {
-        if (e.target.value.trim() === '') {
-            e.target.style.borderColor = '#dc2626';
-        } else {
-            e.target.style.borderColor = '#22c55e';
-        }
-    }
+// Auto-dismiss alerts after 6 s
+document.querySelectorAll('.alert').forEach(el => {
+    setTimeout(() => {
+        el.style.transition = 'opacity .3s';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+    }, 6000);
 });
 </script>
-
 {% endblock %}

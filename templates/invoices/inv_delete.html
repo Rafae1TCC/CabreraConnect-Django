@@ -1,5 +1,6 @@
 {% extends 'inv-base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %}Delete Invoice - Cabrera Connect{% endblock %}
 
@@ -151,47 +152,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Handle form submission with final confirmation
-    deleteForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const confirmValue = confirmInput.value.trim().toUpperCase();
-        
-        if (confirmValue !== 'DELETE') {
-            alert('Please type "DELETE" to confirm.');
-            confirmInput.focus();
-            return;
-        }
-        
-        // Final confirmation dialog
-        const finalConfirm = confirm(
-            `Are you absolutely sure you want to delete invoice "{{ invoice.title }}"?\n\n` +
-            `This action cannot be undone and all data will be permanently lost.`
-        );
-        
-        if (finalConfirm) {
-            // Show loading state
-            deleteBtn.classList.add('loading');
-            deleteBtn.disabled = true;
-            confirmInput.disabled = true;
-            
-            // Add a slight delay to show the loading state
-            setTimeout(() => {
-                this.submit();
-            }, 500);
-        }
-    });
-    
     // Auto-focus on confirmation input
     confirmInput.focus();
-    
-    // Prevent accidental navigation
-    window.addEventListener('beforeunload', function(e) {
-        if (confirmInput.value.trim() !== '') {
-            e.preventDefault();
-            e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        }
-    });
+
 });
 
 // Add visual feedback for dangerous action

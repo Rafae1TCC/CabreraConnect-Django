@@ -1,0 +1,357 @@
+{% extends 'inv-base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Users - Cabrera Connect{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/invoice-styles.css' %}">
+<style>
+    .user-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffcc00, #ffaa00);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #1a1a1a;
+    }
+    
+    .badge-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .badge-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .badge-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .badge-staff {
+        background: #cfe2ff;
+        color: #084298;
+    }
+    
+    .badge-superuser {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .btn-icon {
+        padding: 0.375rem 0.75rem;
+        margin: 0 0.125rem;
+    }
+    
+    .search-bar {
+        max-width: 400px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffcc00;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.3s;
+        border-radius: 24px;
+    }
+    
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+        background-color: #22c55e;
+    }
+    
+    input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+    
+    .input-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .input-group .form-control {
+        flex: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">User Management</h1>
+            <p class="page-subtitle">Manage system users and permissions</p>
+        </div>
+        <a href="{% url 'user_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Create New User
+        </a>
+    </div>
+    
+    <!-- Stats Summary - Corregido sin usar filtros 'select' -->
+    <div class="stats-summary">
+        <div class="stat-card">
+            <div class="stat-number">{{ users|length }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ active_users_count }}</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ staff_count }}</div>
+            <div class="stat-label">Staff Members</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ superuser_count }}</div>
+            <div class="stat-label">Superusers</div>
+        </div>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <form method="get" action="{% url 'user_list' %}">
+            <div class="input-group">
+                <input type="text" 
+                       name="search" 
+                       class="form-control" 
+                       placeholder="Search by username, email, or name..."
+                       value="{{ search }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                {% if search %}
+                    <a href="{% url 'user_list' %}" class="btn btn-secondary">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    
+    <!-- Users List -->
+    <div class="users-list">
+        {% for user in users %}
+        <div class="user-card">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="display: flex; gap: 1rem; flex: 1;">
+                    <div class="user-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                            <h3 style="margin: 0; font-size: 1.1rem;">{{ user.get_full_name|default:user.username }}</h3>
+                            <span class="badge-status {% if user.is_active %}badge-active{% else %}badge-inactive{% endif %}">
+                                {% if user.is_active %}
+                                    <i class="fas fa-circle" style="font-size: 0.5rem;"></i> Active
+                                {% else %}
+                                    <i class="fas fa-circle" style="font-size: 0.5rem;"></i> Inactive
+                                {% endif %}
+                            </span>
+                            {% if user.is_staff %}
+                            <span class="badge-status badge-staff">
+                                <i class="fas fa-user-tie"></i> Staff
+                            </span>
+                            {% endif %}
+                            {% if user.is_superuser %}
+                            <span class="badge-status badge-superuser">
+                                <i class="fas fa-crown"></i> Superuser
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; color: #666;">
+                            <span><i class="fas fa-user"></i> @{{ user.username }}</span>
+                            <span><i class="fas fa-envelope"></i> {{ user.email }}</span>
+                            <span><i class="fas fa-calendar"></i> Joined: {{ user.date_joined|date:"M d, Y" }}</span>
+                            {% if user.last_login %}
+                            <span><i class="fas fa-clock"></i> Last login: {{ user.last_login|date:"M d, Y" }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <!-- Status Toggle -->
+                    {% if user != request.user %}
+                    <label class="toggle-switch">
+                        <input type="checkbox" 
+                               class="status-toggle" 
+                               data-user-id="{{ user.id }}"
+                               {% if user.is_active %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    {% endif %}
+                    
+                    <!-- Action Buttons -->
+                    <a href="{% url 'user_edit' user.id %}" class="btn btn-sm btn-primary btn-icon" title="Edit User">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    {% if user != request.user %}
+                    <a href="{% url 'user_delete' user.id %}" class="btn btn-sm btn-danger btn-icon" title="Delete User">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 3rem; background: white; border-radius: 12px;">
+            <i class="fas fa-users" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+            <p>No users found.</p>
+            {% if search %}
+                <a href="{% url 'user_list' %}" class="btn btn-secondary">Clear Search</a>
+            {% else %}
+                <a href="{% url 'user_create' %}" class="btn btn-primary">Create First User</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 0.5rem;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" class="btn btn-secondary btn-sm">Previous</a>
+        {% endif %}
+        
+        <span style="padding: 0.5rem 1rem;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}" class="btn btn-secondary btn-sm">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle status toggle via AJAX
+    const toggles = document.querySelectorAll('.status-toggle');
+    
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const userId = this.dataset.userId;
+            const isChecked = this.checked;
+            
+            fetch(`/users/${userId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    // Revert the toggle if there was an error
+                    this.checked = !isChecked;
+                    alert(data.error || 'Error updating user status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.checked = !isChecked;
+                alert('Error updating user status');
+            });
+        });
+    });
+});
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

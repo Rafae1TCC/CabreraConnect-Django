@@ -1,5 +1,353 @@
 {% extends 'base.html' %}
-
 {% load static %}
+{% load i18n %}
 
-{% block title %}Cabrera Connect - Security & IoT Solutions{% endblock title %}
+{% block title %}Services - Cabrera Connect{% endblock title %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  PAGE HERO                                                     -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="services-hero">
+    <div class="hero-inner">
+        <div>
+            <div class="hero-badge">
+                <i class="bi bi-grid-fill"></i>
+                Professional Installation Services
+            </div>
+            <h1 class="hero-title">
+                The Right <span class="title-highlight">Technology</span>,<br>Professionally Installed
+            </h1>
+            <p class="hero-subtitle">
+                We supply and install industry-leading security and IoT equipment sourced from Syscom — Mexico's largest certified technology distributor — and back every project with local expert support.
+            </p>
+            <div class="hero-actions">
+                <a href="#" class="btn btn-primary">
+                    <i class="bi bi-envelope-fill"></i>
+                    Request a Quote
+                </a>
+                <a href="#" class="btn btn-outline">
+                    <i class="bi bi-telephone"></i>
+                    Talk to an Expert
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick-jump nav -->
+        <div class="hero-nav-grid">
+            <a href="#cctv" class="hero-nav-card">
+                <div class="hnc-icon"><i class="bi bi-camera-video-fill"></i></div>
+                <div class="hnc-text">
+                    <strong>CCTV & IP Cameras</strong>
+                    <span>Analog & megapixel</span>
+                </div>
+            </a>
+            <a href="#nvr-dvr" class="hero-nav-card">
+                <div class="hnc-icon"><i class="bi bi-hdd-fill"></i></div>
+                <div class="hnc-text">
+                    <strong>NVRs & DVRs</strong>
+                    <span>Recording systems</span>
+                </div>
+            </a>
+            <a href="#access" class="hero-nav-card">
+                <div class="hnc-icon"><i class="bi bi-door-open-fill"></i></div>
+                <div class="hnc-text">
+                    <strong>Access Control</strong>
+                    <span>Readers & barriers</span>
+                </div>
+            </a>
+            <a href="#alarms" class="hero-nav-card">
+                <div class="hnc-icon"><i class="bi bi-bell-fill"></i></div>
+                <div class="hnc-text">
+                    <strong>Alarms & Intrusion</strong>
+                    <span>Panels & detectors</span>
+                </div>
+            </a>
+            <a href="#iot" class="hero-nav-card">
+                <div class="hnc-icon"><i class="bi bi-router-fill"></i></div>
+                <div class="hnc-text">
+                    <strong>IoT & GPS</strong>
+                    <span>Sensors & trackers</span>
+                </div>
+            </a>
+            <a href="#networking" class="hero-nav-card">
+                <div class="hnc-icon"><i class="bi bi-wifi"></i></div>
+                <div class="hnc-text">
+                    <strong>Networking</strong>
+                    <span>Switches & wireless</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  SERVICES                                                      -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="services-section">
+    <div class="services-container">
+        <div class="section-header">
+            <span class="section-label">Our Services</span>
+            <h2>What We Install</h2>
+            <p>Every service listed below draws on Syscom's certified product catalog. We handle specification, procurement, installation, and commissioning end to end.</p>
+        </div>
+
+        <!-- 1. CCTV & IP Cameras -->
+        <div class="service-block" id="cctv">
+            <div class="service-block-sidebar">
+                <div class="sb-icon"><i class="bi bi-camera-video-fill"></i></div>
+                <div class="sb-title">CCTV & IP Cameras</div>
+                <div class="sb-subtitle">HD analog, 4K IP, PTZ, thermal, fisheye and specialty formats</div>
+            </div>
+            <div class="service-block-body">
+                <p class="service-desc">
+                    From a single entry-point camera to a campus-wide megapixel network, we design and install the right camera system for your environment. We work with dome, bullet, PTZ, fisheye, thermal, and covert formats — indoors, outdoors, and in corrosive or high-humidity conditions. All systems are configured for remote viewing and integrated with your recording platform.
+                </p>
+                <div class="product-tags">
+                    <span class="product-tag"><i class="bi bi-dot"></i>Domo / Eyeball / Turret</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Bullet (Bala)</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>PTZ Pan-Tilt-Zoom</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Motorized Lens</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Fisheye & Hemispheric 360°</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Thermal Cameras</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>WiFi / 4G Wireless</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Anti-corrosion (Marine Grade)</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>4K UHD Resolution</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>AI Analytics Cameras</span>
+                </div>
+                <div class="service-highlights">
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Day & night IR illumination</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Weatherproof IP66 / IK10</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Remote viewing via app</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. NVRs & DVRs -->
+        <div class="service-block" id="nvr-dvr">
+            <div class="service-block-sidebar">
+                <div class="sb-icon"><i class="bi bi-hdd-stack-fill"></i></div>
+                <div class="sb-title">NVRs & DVRs</div>
+                <div class="sb-subtitle">4 to 128-channel recording — analog and IP</div>
+            </div>
+            <div class="service-block-body">
+                <p class="service-desc">
+                    Reliable recording is the backbone of any surveillance system. We install and configure network video recorders (NVR) and digital video recorders (DVR) at any scale, from a 4-channel small-business unit to a 128-channel enterprise rack. Storage is sized to your retention requirements, and every unit is configured for redundancy, remote access, and event-based recording.
+                </p>
+                <div class="product-tags">
+                    <span class="product-tag"><i class="bi bi-dot"></i>NVRs — 4 to 128 ch</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>DVRs HD — 4 to 32 ch</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Hybrid NVR/DVR</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Video Management Software (VMS)</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Synology NAS Storage</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Complete Kits (Camera + Recorder)</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>RAID & Redundant Storage</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>LPR & Facial Recognition</span>
+                </div>
+                <div class="service-highlights">
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>H.265+ compression</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Motion & event triggers</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Secure remote playback</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Access Control -->
+        <div class="service-block" id="access">
+            <div class="service-block-sidebar">
+                <div class="sb-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                <div class="sb-title">Access Control</div>
+                <div class="sb-subtitle">Card, biometric, PIN, and mobile-based entry management</div>
+            </div>
+            <div class="service-block-body">
+                <p class="service-desc">
+                    Control exactly who enters your facility, which doors, and at what times. We install complete access control ecosystems — from standalone readers to enterprise-grade systems managing hundreds of doors — including electric strikes, magnetic locks, turnstiles, and boom barriers. Full audit trails, time schedules, and remote override are standard on every installation.
+                </p>
+                <div class="product-tags">
+                    <span class="product-tag"><i class="bi bi-dot"></i>RFID Card Readers</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Biometric Fingerprint</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Facial Recognition Terminals</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>PIN Keypads</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Electric Strikes & Mag-locks</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Turnstiles & Barriers</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Vehicle Boom Gates</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Video Intercoms</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>IP Door Phones</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Multi-door Controllers</span>
+                </div>
+                <div class="service-highlights">
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Full activity audit trail</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Time & zone schedules</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Remote unlock capability</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Alarms & Intrusion -->
+        <div class="service-block" id="alarms">
+            <div class="service-block-sidebar">
+                <div class="sb-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                <div class="sb-title">Alarms & Intrusion</div>
+                <div class="sb-subtitle">Detection, panels, sirens, and smart home security</div>
+            </div>
+            <div class="service-block-body">
+                <p class="service-desc">
+                    A robust alarm system is your last line of defense. We design and install perimeter and interior intrusion detection systems — from a simple residential alarm to a multi-zone commercial panel with central monitoring integration. All systems include app-based arming/disarming, real-time notifications, and optional professional monitoring connectivity.
+                </p>
+                <div class="product-tags">
+                    <span class="product-tag"><i class="bi bi-dot"></i>Alarm Control Panels</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>PIR Motion Detectors</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Door & Window Sensors</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Glass Break Detectors</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Perimeter Beam Detectors</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Sirens & Strobes</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Smoke & CO Detectors</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Smart Alarm Kits (App-based)</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Cellular Communicators</span>
+                </div>
+                <div class="service-highlights">
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>App control & alerts</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Monitoring station ready</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Cellular & IP backup</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. IoT & GPS -->
+        <div class="service-block" id="iot">
+            <div class="service-block-sidebar">
+                <div class="sb-icon"><i class="bi bi-cpu-fill"></i></div>
+                <div class="sb-title">IoT & GPS Tracking</div>
+                <div class="sb-subtitle">Connected sensors, fleet GPS, and smart automation</div>
+            </div>
+            <div class="service-block-body">
+                <p class="service-desc">
+                    We deploy IoT sensor networks and GPS tracking solutions that give you real-time visibility over your assets, vehicles, and operational environment. Whether you need to monitor temperature in a cold chain, track a fleet of vehicles, or automate lighting and access based on occupancy, we integrate the sensors, gateways, and software into a unified dashboard.
+                </p>
+                <div class="product-tags">
+                    <span class="product-tag"><i class="bi bi-dot"></i>GPS Vehicle Trackers</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>IoT Environmental Sensors</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>4G LTE Routers & Gateways</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Fleet Management Software</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Mobile DVRs (In-vehicle)</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>LoRaWAN Sensors</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Smart Lighting Control</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Home / Building Automation</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Occupancy & People Counting</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Remote Monitoring Dashboards</span>
+                </div>
+                <div class="service-highlights">
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Real-time asset tracking</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Cloud-based dashboards</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Automated alerts & rules</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Networking Infrastructure -->
+        <div class="service-block" id="networking">
+            <div class="service-block-sidebar">
+                <div class="sb-icon"><i class="bi bi-diagram-3-fill"></i></div>
+                <div class="sb-title">Network Infrastructure</div>
+                <div class="sb-subtitle">Structured cabling, switches, PoE, and wireless</div>
+            </div>
+            <div class="service-block-body">
+                <p class="service-desc">
+                    Every IP security and IoT system runs on a network. We design and install the underlying infrastructure — structured cabling, PoE switches, fiber optic runs, and enterprise-grade wireless access points — that your cameras, access controllers, and sensors depend on. A well-built network means fewer failures, faster troubleshooting, and room to scale.
+                </p>
+                <div class="product-tags">
+                    <span class="product-tag"><i class="bi bi-dot"></i>PoE & PoE+ Switches</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Managed Layer 2/3 Switches</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Wireless Access Points</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Fiber Optic Cabling</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Cat6 / Cat6A Structured Cabling</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Industrial 4G/LTE Routers</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>Network Patch Panels & Racks</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>UPS & Power Backup</span>
+                    <span class="product-tag"><i class="bi bi-dot"></i>VLANs & Network Segmentation</span>
+                </div>
+                <div class="service-highlights">
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Designed for IP surveillance</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>PoE for camera power</span></div>
+                    <div class="highlight-item"><i class="bi bi-check-circle-fill"></i><span>Scalable architecture</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  BRANDS                                                        -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="brands-section">
+    <div class="brands-container">
+        <div class="section-header">
+            <span class="section-label">Trusted Brands</span>
+            <h2>Equipment We Work With</h2>
+            <p>We install products from the world's leading manufacturers, all sourced through Syscom's certified distribution network.</p>
+        </div>
+        <div class="brands-grid">
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Hikvision</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Hanwha Vision</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Dahua</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Axis</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>EZVIZ</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>HikMicro</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Bosch Security</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Honeywell</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>DSC</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Paradox</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Ubiquiti</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>TP-Link Omada</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Ruijie</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Teltonika</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Grandstream</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>ZKTeco</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Garmin</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Synology</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>EPCOM</span>
+            <span class="brand-pill"><i class="bi bi-patch-check-fill"></i>Digifort VMS</span>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  CTA                                                           -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="cta-section">
+    <div class="cta-container">
+        <div class="cta-content">
+            <h2>Not Sure What <span class="cta-highlight">You Need?</span></h2>
+            <p>Our engineers will assess your site, identify gaps, and recommend the right products and system architecture — at no cost and with no obligation. Let's start with a conversation.</p>
+            <div class="cta-actions">
+                <a href="{% url 'contact_form' %}" class="btn btn-cta-secondary">
+                    <i class="bi bi-whatsapp"></i>
+                    WhatsApp Us
+                </a>
+            </div>
+        </div>
+        <div class="cta-stats">
+            <div class="cta-stat">
+                <div class="cta-stat-number">6</div>
+                <div class="cta-stat-label">Service Lines</div>
+            </div>
+            <div class="cta-stat">
+                <div class="cta-stat-number">20+</div>
+                <div class="cta-stat-label">Brands Installed</div>
+            </div>
+            <div class="cta-stat">
+                <div class="cta-stat-number">Free</div>
+                <div class="cta-stat-label">Site Assessment</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

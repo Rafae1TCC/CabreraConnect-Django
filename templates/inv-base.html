@@ -1,10 +1,13 @@
 {% load static %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Dashboard - Cabrera Connect{% endblock title %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/dash-nav.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -21,8 +24,19 @@
                 </div>
                 
                 <div class="nav-menu" id="navMenu">
+                    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
                     <a href="{% url 'inv_list' %}" class="nav-link {% if request.resolver_match.url_name == 'inv_list' %}active{% endif %}">Invoice List</a>
                     <a href="{% url 'inv_crt' %}" class="nav-link {% if request.resolver_match.url_name == 'inv_crt' %}active{% endif %}">Create Invoice</a>
+                    
+                    <!-- Solo mostrar enlace de gestión de usuarios para superusuarios -->
+                    {% if user.is_superuser %}
+                        <a href="{% url 'user_list' %}" class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                    {% endif %}
+                    
                     <a href="{% url 'logout' %}" class="btn-logout">
                         <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -43,13 +57,11 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-content">
-
-            <!-- Page Content -->
             {% block content %}
             {% endblock content %}
         </div>
     </div>
-    <script href="{% static 'dash-nav' %}"></script>
+    <script src="{% static 'js/dash-nav.js' %}"></script>
     {% block js %}{% endblock js %}
 </body>
 </html>

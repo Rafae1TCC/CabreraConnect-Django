@@ -1,158 +1,257 @@
 {% extends 'base.html' %}
-
 {% load static %}
+{% load i18n %}
 
 {% block title %}Cabrera Connect - Security & IoT Solutions{% endblock title %}
 
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+{% endblock %}
+
 {% block content %}
-<!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-container">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span>📍</span>
-                    Based in Baja California
-                </div>
-                <h1 class="hero-title">
-                    Professional <span class="title-highlight">Security</span> & IoT Solutions
-                </h1>
-                <p class="hero-subtitle">
-                    Enterprise-grade surveillance systems and intelligent IoT solutions designed to protect your assets and streamline operations. Trusted by businesses across Baja California.
-                </p>
-                <div class="hero-actions">
-                    <a href="#" class="btn btn-primary">
-                        <span>Get Started</span>
-                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="btn btn-secondary">
-                        <span>View Solutions</span>
-                    </a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <div class="stat-icon"></div>
-                        <span>500+ Installations</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"></div>
-                        <span>24/7 Monitoring</span>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-icon"></div>
-                        <span>99.9% Uptime</span>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="security-dashboard">
-                    <div class="dashboard-header">
-                        <h3 class="dashboard-title">Security Overview</h3>
-                        <div class="status-indicator"></div>
-                    </div>
-                    <div class="security-items">
-                        <div class="security-item">
-                            <div class="item-info">
-                                <div class="item-icon">📹</div>
-                                <div class="item-details">
-                                    <h4>Camera System</h4>
-                                    <p>24 cameras active</p>
-                                </div>
-                            </div>
-                            <div class="item-status">Online</div>
-                        </div>
-                        <div class="security-item">
-                            <div class="item-info">
-                                <div class="item-icon">🔒</div>
-                                <div class="item-details">
-                                    <h4>Access Control</h4>
-                                    <p>12 entry points</p>
-                                </div>
-                            </div>
-                            <div class="item-status">Secure</div>
-                        </div>
-                        <div class="security-item">
-                            <div class="item-info">
-                                <div class="item-icon">🌐</div>
-                                <div class="item-details">
-                                    <h4>IoT Devices</h4>
-                                    <p>48 sensors connected</p>
-                                </div>
-                            </div>
-                            <div class="item-status">Active</div>
-                        </div>
-                        <div class="security-item">
-                            <div class="item-info">
-                                <div class="item-icon">⚡</div>
-                                <div class="item-details">
-                                    <h4>System Health</h4>
-                                    <p>All systems optimal</p>
-                                </div>
-                            </div>
-                            <div class="item-status">Normal</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Features Section -->
-    <section class="features-section">
-        <div class="features-container">
-            <div class="section-header">
-                <h2>What do we offer?</h2>
-                <p>Comprehensive security solutions tailored for modern business challenges</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Advanced Security</h3>
-                    <p>Enterprise-grade security systems with AI-powered threat detection, real-time monitoring, and comprehensive analytics for complete peace of mind.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>IoT Integration</h3>
-                    <p>Seamlessly connect and manage all your smart devices through our unified platform, creating an intelligent ecosystem for your business.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
-                    <h3>Reliable Performance</h3>
-                    <p>Lightning-fast response times with our high-performance infrastructure, ensuring your security systems are always operational when you need them most.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛠️</div>
-                    <h3>Expert Support</h3>
-                    <p>Local Baja California team providing round-the-clock technical support, maintenance services, and rapid response to any security concerns.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="cta-container">
-            <div class="cta-content">
-                <h2>Ready to <span class="cta-highlight">Secure</span> Your Business?</h2>
-                <p>Join hundreds of satisfied clients across Baja California who trust Cabrera Connect for their mission-critical security and IoT infrastructure needs.</p>
-                <a href="#" class="btn btn-cta">
-                    <span>Get a Quote</span>
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  HERO                                                         -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="bi bi-geo-alt-fill"></i>
+                Based in Baja California
+            </div>
+            <h1 class="hero-title">
+                Professional <span class="title-highlight">Security</span> &amp; IoT Solutions
+            </h1>
+            <p class="hero-subtitle">
+                Enterprise-grade surveillance systems and intelligent IoT solutions designed to protect your assets and streamline operations. Trusted by businesses across Baja California.
+            </p>
+            <div class="hero-actions">
+                <a href="{% url 'contact_form' %}" class="btn btn-primary">
+                    Get Started
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="{% url 'services' %}" class="btn btn-secondary">
+                    <i class="bi bi-grid-1x2"></i>
+                    View Solutions
                 </a>
             </div>
-            <div class="cta-stats">
-                <div class="stat">
-                    <div class="stat-number">500+</div>
-                    <div class="stat-label">Projects Completed</div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-dot"></span>
+                    500+ Installations
                 </div>
-                <div class="stat">
-                    <div class="stat-number">24/7</div>
-                    <div class="stat-label">Support Available</div>
+                <div class="stat-item">
+                    <span class="stat-dot"></span>
+                    24/7 Monitoring
                 </div>
-                <div class="stat">
-                    <div class="stat-number">99.9%</div>
-                    <div class="stat-label">Uptime Guarantee</div>
+                <div class="stat-item">
+                    <span class="stat-dot"></span>
+                    99.9% Uptime
                 </div>
             </div>
-    </section>
+        </div>
+
+        <div class="hero-visual">
+            <div class="security-dashboard">
+                <div class="dashboard-header">
+                    <h3 class="dashboard-title">Security Overview</h3>
+                    <div class="status-live">
+                        <span class="status-dot"></span>
+                        Live
+                    </div>
+                </div>
+                <div class="security-items">
+                    <div class="security-item">
+                        <div class="item-info">
+                            <div class="item-icon"><i class="bi bi-camera-video-fill"></i></div>
+                            <div class="item-details">
+                                <h4>Camera System</h4>
+                                <p>24 cameras active</p>
+                            </div>
+                        </div>
+                        <div class="item-status">Online</div>
+                    </div>
+                    <div class="security-item">
+                        <div class="item-info">
+                            <div class="item-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                            <div class="item-details">
+                                <h4>Access Control</h4>
+                                <p>12 entry points</p>
+                            </div>
+                        </div>
+                        <div class="item-status">Secure</div>
+                    </div>
+                    <div class="security-item">
+                        <div class="item-info">
+                            <div class="item-icon"><i class="bi bi-router-fill"></i></div>
+                            <div class="item-details">
+                                <h4>IoT Devices</h4>
+                                <p>48 sensors connected</p>
+                            </div>
+                        </div>
+                        <div class="item-status">Active</div>
+                    </div>
+                    <div class="security-item">
+                        <div class="item-info">
+                            <div class="item-icon"><i class="bi bi-activity"></i></div>
+                            <div class="item-details">
+                                <h4>System Health</h4>
+                                <p>All systems optimal</p>
+                            </div>
+                        </div>
+                        <div class="item-status">Normal</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TRUST STRIP                                                   -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="trust-section">
+    <div class="trust-container">
+        <div class="trust-item">
+            <div class="trust-number">500<span>+</span></div>
+            <div class="trust-label">Projects Completed</div>
+            <div class="trust-desc">Across Baja California</div>
+        </div>
+        <div class="trust-item">
+            <div class="trust-number">24<span>/7</span></div>
+            <div class="trust-label">Monitoring</div>
+            <div class="trust-desc">Round-the-clock support</div>
+        </div>
+        <div class="trust-item">
+            <div class="trust-number">99.9<span>%</span></div>
+            <div class="trust-label">Uptime Guarantee</div>
+            <div class="trust-desc">Mission-critical reliability</div>
+        </div>
+        <div class="trust-item">
+            <div class="trust-number">12<span>+</span></div>
+            <div class="trust-label">Years Experience</div>
+            <div class="trust-desc">In security & IoT</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  FEATURES                                                      -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="features-section">
+    <div class="features-container">
+        <div class="section-header">
+            <span class="section-label">What We Offer</span>
+            <h2>Comprehensive Security Solutions</h2>
+            <p>Tailored systems engineered for the demands of modern business — from a single facility to a multi-site enterprise.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+                <h3>Advanced Security</h3>
+                <p>Enterprise-grade systems with AI-powered threat detection, real-time monitoring, and comprehensive analytics. Every solution is designed to adapt as your security needs evolve.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-diagram-3"></i></div>
+                <h3>IoT Integration</h3>
+                <p>Connect and manage all your smart devices through a unified control platform. We design intelligent ecosystems where every sensor, camera, and controller works in concert.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-lightning-charge"></i></div>
+                <h3>Reliable Performance</h3>
+                <p>High-availability infrastructure built for mission-critical uptime. Redundant systems, remote diagnostics, and proactive maintenance ensure your security never sleeps.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-headset"></i></div>
+                <h3>Local Expert Support</h3>
+                <p>Our Baja California-based team provides rapid on-site response alongside round-the-clock remote support — so you always have a knowledgeable person, not a call center.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-lock"></i></div>
+                <h3>Access Control</h3>
+                <p>Manage who enters your facility and when — from keycard systems to biometric readers. Full audit trails, remote override, and seamless integration with existing infrastructure.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="bi bi-cloud-check"></i></div>
+                <h3>Cloud Management</h3>
+                <p>Monitor and manage your entire security infrastructure from anywhere in the world through our encrypted, browser-based dashboard — no additional software required.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  HOW IT WORKS                                                  -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="process-section">
+    <div class="process-container">
+        <div class="section-header">
+            <span class="section-label">Our Process</span>
+            <h2>From Assessment to Operation</h2>
+            <p>A structured, transparent process that ensures every installation meets the highest standards — on time and on budget.</p>
+        </div>
+        <div class="process-steps">
+            <div class="process-step">
+                <div class="step-number"><i class="bi bi-clipboard2-pulse"></i></div>
+                <h3>Site Assessment</h3>
+                <p>Our engineers conduct a thorough on-site evaluation, identifying vulnerabilities and mapping out the optimal system architecture for your facility.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number"><i class="bi bi-pencil-square"></i></div>
+                <h3>Custom Design</h3>
+                <p>We design a tailored solution — selecting the right hardware, software, and network topology — and present a clear, itemized proposal before any work begins.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number"><i class="bi bi-tools"></i></div>
+                <h3>Professional Installation</h3>
+                <p>Our certified technicians handle every aspect of installation with minimal disruption to your operations, following rigorous quality-control checkpoints throughout.</p>
+            </div>
+            <div class="process-step">
+                <div class="step-number"><i class="bi bi-person-check"></i></div>
+                <h3>Training & Handover</h3>
+                <p>We train your team to confidently operate the system, provide full documentation, and remain available for ongoing support from day one.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  CTA                                                           -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<section class="cta-section">
+    <div class="cta-container">
+        <div class="cta-content">
+            <h2>Ready to <span class="cta-highlight">Secure</span> Your Business?</h2>
+            <p>Join hundreds of satisfied clients across Baja California who trust Cabrera Connect for their mission-critical security and IoT infrastructure. Let's build something that works — and lasts.</p>
+            <div class="cta-actions">
+                <a href="#" class="btn btn-cta-primary">
+                    <i class="bi bi-envelope-fill"></i>
+                    Get a Free Quote
+                </a>
+                <a href="#" class="btn btn-cta-secondary">
+                    <i class="bi bi-telephone"></i>
+                    Call Us Now
+                </a>
+            </div>
+        </div>
+        <div class="cta-stats">
+            <div class="cta-stat">
+                <div class="cta-stat-number">500+</div>
+                <div class="cta-stat-label">Installations</div>
+            </div>
+            <div class="cta-stat">
+                <div class="cta-stat-number">24/7</div>
+                <div class="cta-stat-label">Support</div>
+            </div>
+            <div class="cta-stat">
+                <div class="cta-stat-number">99.9%</div>
+                <div class="cta-stat-label">Uptime</div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock content %}

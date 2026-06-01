@@ -1,33 +1,405 @@
 {% extends 'base.html' %}
-
 {% load static %}
+{% load i18n %}
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/contact-form.css' %}">
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
 {% endblock css %}
 
-{% block title %}Cabrera Connect - Security & IoT Solutions{% endblock title %}
-
+{% block title %}Request a Quote — Cabrera Connect{% endblock title %}
 
 {% block content %}
 
-<div class="form-container">
-    <form method="post" class="contact-form" action="{% url 'contact_form' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        {% if success %}
-        <div class="alert alert-success">
-            ✓ Thank you! Your message has been sent successfully.
+<section class="quote-hero">
+    <div class="qh-inner">
+        <div class="hero-badge">
+            <i class="bi bi-whatsapp"></i>
+            Sent directly via WhatsApp
         </div>
-        {% endif %}
+        <h1 class="hero-title">
+            Request a <span class="title-highlight">Free Quote</span>
+        </h1>
+        <p class="hero-subtitle">
+            Fill out the form below and we'll receive your request instantly on WhatsApp. A member of our team will get back to you within one business day.
+        </p>
+    </div>
+</section>
 
-        {% if error %}
-        <div class="alert alert-error">
-            ⚠ There was an error sending your message. Please try again.
+<section class="quote-section">
+    <div class="quote-container">
+
+        <!-- ── Left: form ──────────────────────────────────────────── -->
+        <div class="quote-form-wrap">
+
+            {# Django renders field errors inline; we keep the form tag for validation only. #}
+            {# The actual submission is intercepted by JS and redirects to WhatsApp.        #}
+            <form id="quoteForm" method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Step 1 ── Contact info -->
+                <div class="form-section-block">
+                    <div class="fsb-header">
+                        <div class="fsb-icon"><i class="bi bi-person-fill"></i></div>
+                        <div>
+                            <h3 class="fsb-title">Contact Information</h3>
+                            <p class="fsb-sub">How can we reach you?</p>
+                        </div>
+                    </div>
+                    <div class="field-grid field-grid-2">
+                        <div class="field-wrap">
+                            <label for="id_name" class="field-label required">Full Name</label>
+                            <div class="input-wrap">
+                                <i class="bi bi-person input-icon"></i>
+                                <input type="text" id="id_name" name="name"
+                                       placeholder="John Doe"
+                                       value="{{ form.name.value|default:'' }}"
+                                       class="field-input{% if form.name.errors %} invalid{% endif %}"
+                                       required>
+                            </div>
+                            {% for error in form.name.errors %}
+                                <span class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="field-wrap">
+                            <label for="id_email" class="field-label required">Email Address</label>
+                            <div class="input-wrap">
+                                <i class="bi bi-envelope input-icon"></i>
+                                <input type="email" id="id_email" name="email"
+                                       placeholder="john@example.com"
+                                       value="{{ form.email.value|default:'' }}"
+                                       class="field-input{% if form.email.errors %} invalid{% endif %}"
+                                       required>
+                            </div>
+                            {% for error in form.email.errors %}
+                                <span class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="field-wrap">
+                            <label for="id_phone" class="field-label required">Phone / WhatsApp</label>
+                            <div class="input-wrap">
+                                <i class="bi bi-telephone input-icon"></i>
+                                <input type="tel" id="id_phone" name="phone"
+                                       placeholder="+52 664 000 0000"
+                                       value="{{ form.phone.value|default:'' }}"
+                                       class="field-input{% if form.phone.errors %} invalid{% endif %}"
+                                       required>
+                            </div>
+                            {% for error in form.phone.errors %}
+                                <span class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="field-wrap">
+                            <label for="id_property_type" class="field-label required">Property Type</label>
+                            <div class="input-wrap select-wrap">
+                                <i class="bi bi-building input-icon"></i>
+                                <select id="id_property_type" name="property_type"
+                                        class="field-input{% if form.property_type.errors %} invalid{% endif %}"
+                                        required>
+                                    <option value="">— Select one —</option>
+                                    <option value="residential" {% if form.property_type.value == 'residential' %}selected{% endif %}>Residential</option>
+                                    <option value="commercial"  {% if form.property_type.value == 'commercial'  %}selected{% endif %}>Commercial</option>
+                                    <option value="industrial"  {% if form.property_type.value == 'industrial'  %}selected{% endif %}>Industrial</option>
+                                    <option value="government"  {% if form.property_type.value == 'government'  %}selected{% endif %}>Government / Institutional</option>
+                                    <option value="other"       {% if form.property_type.value == 'other'       %}selected{% endif %}>Other</option>
+                                </select>
+                                <i class="bi bi-chevron-down select-arrow"></i>
+                            </div>
+                            {% for error in form.property_type.errors %}
+                                <span class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 ── Installation address -->
+                <div class="form-section-block">
+                    <div class="fsb-header">
+                        <div class="fsb-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div>
+                            <h3 class="fsb-title">Installation Address</h3>
+                            <p class="fsb-sub">Where will the work take place?</p>
+                        </div>
+                    </div>
+                    <div class="field-wrap">
+                        <label for="id_address" class="field-label required">Full Address</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-map input-icon"></i>
+                            <input type="text" id="id_address" name="address"
+                                   placeholder="Street, Number, Colonia, City, State"
+                                   value="{{ form.address.value|default:'' }}"
+                                   class="field-input{% if form.address.errors %} invalid{% endif %}"
+                                   required>
+                        </div>
+                        {% for error in form.address.errors %}
+                            <span class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Step 3 ── Services -->
+                <div class="form-section-block">
+                    <div class="fsb-header">
+                        <div class="fsb-icon"><i class="bi bi-grid-fill"></i></div>
+                        <div>
+                            <h3 class="fsb-title">Services Required</h3>
+                            <p class="fsb-sub">Select all that apply to your project.</p>
+                        </div>
+                    </div>
+                    {% if form.services.errors %}
+                        <span class="field-error mb-1"><i class="bi bi-exclamation-circle"></i> Please select at least one service.</span>
+                    {% endif %}
+                    <div class="service-checks">
+                        <label class="service-check-card">
+                            <input type="checkbox" name="services" value="cctv"
+                                   {% if 'cctv' in form.services.value|default:'' %}checked{% endif %}>
+                            <div class="scc-inner">
+                                <div class="scc-icon"><i class="bi bi-camera-video-fill"></i></div>
+                                <span class="scc-label">CCTV &amp; IP Cameras</span>
+                            </div>
+                        </label>
+                        <label class="service-check-card">
+                            <input type="checkbox" name="services" value="nvr_dvr"
+                                   {% if 'nvr_dvr' in form.services.value|default:'' %}checked{% endif %}>
+                            <div class="scc-inner">
+                                <div class="scc-icon"><i class="bi bi-hdd-stack-fill"></i></div>
+                                <span class="scc-label">NVRs &amp; DVRs</span>
+                            </div>
+                        </label>
+                        <label class="service-check-card">
+                            <input type="checkbox" name="services" value="access"
+                                   {% if 'access' in form.services.value|default:'' %}checked{% endif %}>
+                            <div class="scc-inner">
+                                <div class="scc-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                                <span class="scc-label">Access Control</span>
+                            </div>
+                        </label>
+                        <label class="service-check-card">
+                            <input type="checkbox" name="services" value="alarms"
+                                   {% if 'alarms' in form.services.value|default:'' %}checked{% endif %}>
+                            <div class="scc-inner">
+                                <div class="scc-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                                <span class="scc-label">Alarms &amp; Intrusion</span>
+                            </div>
+                        </label>
+                        <label class="service-check-card">
+                            <input type="checkbox" name="services" value="iot_gps"
+                                   {% if 'iot_gps' in form.services.value|default:'' %}checked{% endif %}>
+                            <div class="scc-inner">
+                                <div class="scc-icon"><i class="bi bi-cpu-fill"></i></div>
+                                <span class="scc-label">IoT &amp; GPS Tracking</span>
+                            </div>
+                        </label>
+                        <label class="service-check-card">
+                            <input type="checkbox" name="services" value="networking"
+                                   {% if 'networking' in form.services.value|default:'' %}checked{% endif %}>
+                            <div class="scc-inner">
+                                <div class="scc-icon"><i class="bi bi-diagram-3-fill"></i></div>
+                                <span class="scc-label">Network Infrastructure</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 4 ── Description -->
+                <div class="form-section-block">
+                    <div class="fsb-header">
+                        <div class="fsb-icon"><i class="bi bi-chat-text-fill"></i></div>
+                        <div>
+                            <h3 class="fsb-title">Project Description</h3>
+                            <p class="fsb-sub">Give us details so we can prepare an accurate quote.</p>
+                        </div>
+                    </div>
+                    <div class="field-wrap">
+                        <label for="id_description" class="field-label required">Description</label>
+                        <textarea id="id_description" name="description" rows="5"
+                                  placeholder="Describe the scope of work: number of cameras, coverage areas, existing infrastructure, special requirements, timeline, etc."
+                                  class="field-input field-textarea{% if form.description.errors %} invalid{% endif %}"
+                                  required>{{ form.description.value|default:'' }}</textarea>
+                        {% for error in form.description.errors %}
+                            <span class="field-error"><i class="bi bi-exclamation-circle"></i> {{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="bi bi-whatsapp"></i>
+                    Send Quote Request via WhatsApp
+                    <i class="bi bi-arrow-right btn-arrow"></i>
+                </button>
+                <p class="submit-note">
+                    <i class="bi bi-lock-fill"></i>
+                    Your information is sent directly to our team. We never share your data.
+                </p>
+
+            </form>
         </div>
-        {% endif %}
-        <button type="submit" class="btn btn-primary">Send Message</button>
-    </form>
-</div>
+
+        <!-- ── Right: info sidebar ─────────────────────────────────── -->
+        <aside class="quote-sidebar">
+            <div class="qs-card">
+                <h4 class="qs-title">What happens next?</h4>
+                <div class="qs-steps">
+                    <div class="qs-step">
+                        <div class="qs-step-num">1</div>
+                        <div>
+                            <strong>We receive your request</strong>
+                            <p>Your details land in our WhatsApp instantly.</p>
+                        </div>
+                    </div>
+                    <div class="qs-step">
+                        <div class="qs-step-num">2</div>
+                        <div>
+                            <strong>Site assessment</strong>
+                            <p>We'll reach out to schedule a free on-site visit.</p>
+                        </div>
+                    </div>
+                    <div class="qs-step">
+                        <div class="qs-step-num">3</div>
+                        <div>
+                            <strong>Detailed proposal</strong>
+                            <p>You receive a clear, itemized quote — no surprises.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qs-card qs-contact-card">
+                <h4 class="qs-title">Prefer to call?</h4>
+                <a href="tel:[PHONE]" class="qs-contact-link">
+                    <i class="bi bi-telephone-fill"></i>
+                    <span>[Phone Number]</span>
+                </a>
+                <a href="mailto:[EMAIL]" class="qs-contact-link">
+                    <i class="bi bi-envelope-fill"></i>
+                    <span>[Email Address]</span>
+                </a>
+                <p class="qs-hours">
+                    <i class="bi bi-clock"></i>
+                    Mon–Fri, 8:00 AM – 6:00 PM<br>
+                    Emergency support: 24/7
+                </p>
+            </div>
+
+            <div class="qs-trust">
+                <div class="qs-trust-item"><i class="bi bi-patch-check-fill"></i> Free site assessment</div>
+                <div class="qs-trust-item"><i class="bi bi-patch-check-fill"></i> No-obligation quote</div>
+                <div class="qs-trust-item"><i class="bi bi-patch-check-fill"></i> Local Baja California team</div>
+                <div class="qs-trust-item"><i class="bi bi-patch-check-fill"></i> 24/7 support after install</div>
+            </div>
+        </aside>
+
+    </div>
+</section>
+
+<!-- WhatsApp redirect script -->
+<script>
+(function () {
+    // ── Replace with your actual WhatsApp business number (digits only, with country code)
+    const WA_NUMBER = '526643123031';
+
+    const SERVICE_LABELS = {
+        cctv:       'CCTV & IP Cameras',
+        nvr_dvr:    'NVRs & DVRs / Recording Systems',
+        access:     'Access Control',
+        alarms:     'Alarms & Intrusion Detection',
+        iot_gps:    'IoT & GPS Tracking',
+        networking: 'Network Infrastructure',
+    };
+
+    const PROPERTY_LABELS = {
+        residential: 'Residential',
+        commercial:  'Commercial',
+        industrial:  'Industrial',
+        government:  'Government / Institutional',
+        other:       'Other',
+    };
+
+    document.getElementById('quoteForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+
+        // ── Collect values ──────────────────────────────────────────
+        const name         = form.name.value.trim();
+        const email        = form.email.value.trim();
+        const phone        = form.phone.value.trim();
+        const propertyType = form.property_type.value;
+        const address      = form.address.value.trim();
+        const description  = form.description.value.trim();
+
+        const checked = [...form.querySelectorAll('input[name="services"]:checked')];
+        const services = checked.map(cb => SERVICE_LABELS[cb.value] || cb.value);
+
+        // ── Client-side validation ──────────────────────────────────
+        let errors = [];
+        if (!name)         errors.push('Full name is required.');
+        if (!email)        errors.push('Email address is required.');
+        if (!phone)        errors.push('Phone number is required.');
+        if (!propertyType) errors.push('Please select a property type.');
+        if (!address)      errors.push('Installation address is required.');
+        if (!services.length) errors.push('Please select at least one service.');
+        if (!description)  errors.push('Project description is required.');
+
+        // Remove any previous inline error banner
+        const old = document.getElementById('js-error-banner');
+        if (old) old.remove();
+
+        if (errors.length) {
+            const banner = document.createElement('div');
+            banner.id = 'js-error-banner';
+            banner.className = 'alert alert-error';
+            banner.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${errors.join(' ')}`;
+            form.prepend(banner);
+            banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        // ── Build the WhatsApp message ──────────────────────────────
+        const serviceList = services.map(s => `  • ${s}`).join('\n');
+        const propLabel   = PROPERTY_LABELS[propertyType] || propertyType;
+
+        const msg = [
+            '🔐 *New Quote Request — Cabrera Connect*',
+            '',
+            '*📋 Contact Information*',
+            `Name: ${name}`,
+            `Email: ${email}`,
+            `Phone: ${phone}`,
+            '',
+            '*📍 Installation Details*',
+            `Property Type: ${propLabel}`,
+            `Address: ${address}`,
+            '',
+            '*🛠️ Services Required*',
+            serviceList,
+            '',
+            '*📝 Project Description*',
+            description,
+        ].join('\n');
+
+        const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+        // Show loading state briefly, then open WhatsApp
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="btn-spinner"></span> Opening WhatsApp…';
+        setTimeout(() => {
+            window.open(waUrl, '_blank');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-whatsapp"></i> Send Quote Request via WhatsApp <i class="bi bi-arrow-right btn-arrow"></i>';
+        }, 600);
+    });
+
+    // ── Visual feedback on service card selection ───────────────────
+    document.querySelectorAll('.service-check-card input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            cb.closest('.service-check-card').classList.toggle('checked', cb.checked);
+        });
+    });
+})();
+</script>
 
 {% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'inv-base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Delete User - Cabrera Connect{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/invoice-styles.css' %}">
+<style>
+    .delete-warning {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .warning-icon {
+        font-size: 4rem;
+        color: #dc2626;
+        margin-bottom: 1rem;
+    }
+    
+    .user-info {
+        background: #f8f8f8;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        text-align: left;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="delete-warning">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2>Delete User</h2>
+        <p>Are you sure you want to delete the following user?</p>
+        
+        <div class="user-info">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Full Name:</strong> {{ user.get_full_name|default:"Not provided" }}</p>
+            <p><strong>Staff Status:</strong> {% if user.is_staff %}Yes{% else %}No{% endif %}</p>
+            <p><strong>Superuser Status:</strong> {% if user.is_superuser %}Yes{% else %}No{% endif %}</p>
+        </div>
+        
+        <p style="color: #dc2626; font-weight: 500;">This action cannot be undone.</p>
+        
+        <form method="post" style="margin-top: 2rem;">
+            {% csrf_token %}
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-danger">Yes, Delete User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

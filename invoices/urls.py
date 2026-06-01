@@ -1,7 +1,11 @@
+# urls.py
 from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Dashboard - Añadir esta línea
+    path('dashboard/', views.dashboard, name='dashboard'),
+    
     path('list/', views.inv_list, name="inv_list"),
     path('create/', views.inv_crt, name="inv_crt"),
     path('edit/<int:pk>/', views.inv_edit, name="inv_edit"),

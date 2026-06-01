@@ -1,44 +1,140 @@
+
 {% load static %}
+{% load i18n %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
+    {% block css %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    {% block css %}{% endblock css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    {% endblock css %}
 </head>
 <body>
     <div class="landing-container">
-         <!-- Navigation -->
-    <nav class="navbar" id="navbar">
-        <div class="nav-container">
-            <a href="#" class="brand-link">
-                <span class="brand-text">Cabrera Connect</span>
-            </a>
-            
-            <div class="nav-menu" id="navMenu">
-                    <a href="{% url 'landing_page' %}" class="nav-link active">Home</a>
-                    <a href="{% url 'services' %}" class="nav-link">Services</a>
-                    <a href="{% url 'about' %}" class="nav-link">About</a>
+        <!-- Navigation -->
+        <nav class="navbar" id="navbar">
+            <div class="nav-container">
+                <a href="{% url 'landing_page' %}" class="brand-link">
+                    <span class="brand-text">Cabrera Connect</span>
+                </a>
+
+                <div class="nav-menu" id="navMenu">
+                    <a href="{% url 'landing_page' %}"
+                       class="nav-link{% if request.resolver_match.url_name == 'landing_page' %} active{% endif %}">
+                        Home
+                    </a>
+                    <a href="{% url 'services' %}"
+                       class="nav-link{% if request.resolver_match.url_name == 'services' %} active{% endif %}">
+                        Services
+                    </a>
+                    <a href="{% url 'about' %}"
+                       class="nav-link{% if request.resolver_match.url_name == 'about' %} active{% endif %}">
+                        About
+                    </a>
                     <a href="{% url 'contact_form' %}" class="btn btn-nav-cta">
                         <span>Get a Quote</span>
                         <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
                             <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                         </svg>
                     </a>
+                </div>
+
+                <div class="nav-toggle" id="navToggle">
+                    <span class="toggle-line"></span>
+                    <span class="toggle-line"></span>
+                    <span class="toggle-line"></span>
+                </div>
             </div>
-            
-            <div class="nav-toggle" id="navToggle">
-                <span class="toggle-line"></span>
-                <span class="toggle-line"></span>
-                <span class="toggle-line"></span>
-            </div>
-        </div>
-    </nav>
+        </nav>
+
         {% block content %}
         {% endblock content %}
     </div>
-<script href="{% static 'js/navbar.js' %}" ></script>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  FOOTER                                                        -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-top">
+
+            <!-- Brand -->
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="footer-logo-icon"><i class="bi bi-shield-fill-check"></i></div>
+                    <div class="footer-logo-text">Cabrera Connect</div>
+                </div>
+                <p class="footer-tagline">
+                    Professional security and IoT solutions for businesses across Baja California. Protecting what matters most since 2023.
+                </p>
+                <div class="footer-social">
+                    <a href="#" class="social-link" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                    <a href="#" class="social-link" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="social-link" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="social-link" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                </div>
+            </div>
+
+            <!-- Solutions -->
+            <div class="footer-col">
+                <h4>Solutions</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'services' %}">CCTV & IP Cameras</a></li>
+                    <li><a href="{% url 'services' %}">NVRs & DVRs</a></li>
+                    <li><a href="{% url 'services' %}">Access Control</a></li>
+                    <li><a href="{% url 'services' %}">Alarms & Intrusion</a></li>
+                    <li><a href="{% url 'services' %}">IoT & GPS Tracking</a></li>
+                    <li><a href="{% url 'services' %}">Network Infrastructure</a></li>
+                </ul>
+            </div>
+
+            <!-- Company -->
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'about' %}">About Us</a></li>
+                    <li><a href="{% url 'about' %}">Our Team</a></li>
+                    <li><a href="#">Projects</a></li>
+                    <li><a href="#">Certifications</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="{% url 'contact_form' %}">Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <div class="footer-contact-item">
+                    <i class="bi bi-telephone-fill"></i>
+                    <span>6643123031</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="bi bi-envelope-fill"></i>
+                    <span>contact@cabreraconnect.com</span>
+                </div>
+                <div class="footer-contact-item">
+                    <i class="bi bi-clock-fill"></i>
+                    <span>Mon–Fri: 8:00 AM – 6:00 PM<br>Emergency: 24/7</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <span>&copy; {% now "Y" %} Cabrera Connect. All rights reserved.</span>
+            <div class="footer-bottom-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Cookie Policy</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="{% static 'js/navbar.js' %}"></script>
 </body>
 </html>

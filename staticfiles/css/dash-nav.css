@@ -1,0 +1,394 @@
+        /* Dashboard-specific styles */
+        .dashboard-container {
+            padding-top: 80px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+        }
+
+        .dashboard-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Updated navbar for dashboard */
+        .navbar.dashboard-nav {
+            background: rgba(26, 26, 26, 0.95);
+            border-bottom: 1px solid #333333;
+        }
+
+        .navbar.dashboard-nav .brand-text {
+            color: #ffffff;
+        }
+
+        .navbar.dashboard-nav .brand-icon {
+            background: linear-gradient(135deg, #ffcc00, #ffaa00);
+        }
+
+        .navbar.dashboard-nav .nav-link {
+            color: #cccccc;
+        }
+
+        .navbar.dashboard-nav .nav-link:hover,
+        .navbar.dashboard-nav .nav-link.active {
+            color: #ffffff;
+        }
+
+        .navbar.dashboard-nav .nav-link::after {
+            background: #ffcc00;
+        }
+
+        /* Dashboard welcome section */
+        .dashboard-header {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e5e5;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .dashboard-subtitle {
+            color: #666666;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #666666;
+        }
+
+        .breadcrumb-separator {
+            color: #cccccc;
+        }
+
+        .breadcrumb-current {
+            color: #ffcc00;
+            font-weight: 500;
+        }
+
+        /* Logout button styling */
+        .btn-logout {
+            background: #dc2626;
+            color: #ffffff;
+            padding: 0.8rem 1.8rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 2px solid #dc2626;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-logout:hover {
+            background: transparent;
+            color: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.15);
+        }
+
+        /* Mobile responsive updates */
+        @media (max-width: 768px) {
+            .navbar.dashboard-nav .nav-menu {
+                background: rgba(26, 26, 26, 0.98);
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid #333333;
+            }
+
+            .dashboard-content {
+                padding: 1rem;
+            }
+
+            .dashboard-header {
+                padding: 1.5rem;
+            }
+
+            .dashboard-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-header {
+                padding: 1rem;
+            }
+        }
+
+        /* ── Add these rules to your existing dash-nav.css ────────────────
+   They wire up the hamburger toggle for the dashboard navbar.
+   The toggle button and .nav-menu already exist in inv-base.html;
+   these styles make them behave correctly at mobile widths.
+─────────────────────────────────────────────────────────────────── */
+
+/* Hide the toggle button on desktop — show only on mobile */
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 5px;
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    z-index: 1100;
+}
+
+.toggle-line {
+    width: 25px;
+    height: 3px;
+    background: #ffffff;        /* white to match the dark dashboard nav */
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+/* Animate the three lines into an ✕ when active */
+.nav-toggle.active .toggle-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+.nav-toggle.active .toggle-line:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-8px);
+}
+.nav-toggle.active .toggle-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* ── Mobile breakpoint ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* Show the hamburger button */
+    .nav-toggle {
+        display: flex;
+    }
+
+    /* Stack the nav menu off-screen above the navbar, slide it down when active */
+    .nav-menu {
+        position: fixed;
+        top: 80px;          /* height of your dashboard navbar */
+        left: 0;
+        right: 0;
+        background: rgba(26, 26, 26, 0.98);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid #333333;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 1rem 0;
+        transform: translateY(-110%);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Full-width links with bottom border separators */
+    .nav-menu .nav-link {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        width: 100%;
+        text-align: left;
+    }
+
+    .nav-menu .nav-link:last-of-type {
+        border-bottom: none;
+    }
+
+    /* Logout button sits at the bottom of the drawer */
+    .nav-menu .btn-logout {
+        margin: 0.75rem 1.5rem 0.25rem;
+        justify-content: flex-start;
+    }
+}
+
+/* dash-nav.css - Añade estas reglas al final */
+
+/* Ensure nav-menu is properly positioned */
+.nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+/* Mobile styles - Asegurar que funciona en móvil */
+@media (max-width: 768px) {
+    /* Show hamburger button */
+    .nav-toggle {
+        display: flex !important;
+        flex-direction: column;
+        cursor: pointer;
+        gap: 5px;
+        padding: 0.5rem;
+        background: none;
+        border: none;
+        z-index: 1100;
+    }
+    
+    .toggle-line {
+        width: 25px;
+        height: 3px;
+        background: #ffffff;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    
+    /* Animate to X when active */
+    .nav-toggle.active .toggle-line:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+    }
+    
+    .nav-toggle.active .toggle-line:nth-child(2) {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    
+    .nav-toggle.active .toggle-line:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+    
+    /* Hide desktop menu by default on mobile */
+    .nav-menu {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: rgba(26, 26, 26, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 0;
+        transform: translateY(-150%);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 999;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Show menu when active */
+    .nav-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Style menu items for mobile */
+    .nav-menu .nav-link {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        width: 100%;
+        text-align: left;
+        color: #ffffff;
+    }
+    
+    .nav-menu .nav-link:hover,
+    .nav-menu .nav-link.active {
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffcc00;
+    }
+    
+    .nav-menu .nav-link i {
+        margin-right: 0.5rem;
+    }
+    
+    /* Logout button in mobile menu */
+    .nav-menu .btn-logout {
+        margin: 0.75rem 1rem;
+        justify-content: center;
+        background: #dc2626;
+        color: white;
+    }
+    
+    .nav-menu .btn-logout:hover {
+        background: #b91c1c;
+        transform: none;
+    }
+}
+
+/* Desktop styles - hide hamburger on desktop */
+@media (min-width: 769px) {
+    .nav-toggle {
+        display: none !important;
+    }
+    
+    .nav-menu {
+        display: flex !important;
+        position: static;
+        transform: none;
+        opacity: 1;
+        visibility: visible;
+        background: none;
+        backdrop-filter: none;
+        flex-direction: row;
+        padding: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    #navMenu {
+        display: flex !important;
+        flex-direction: column !important;
+        position: fixed !important;
+        top: 80px !important;
+        left: 0 !important;
+        right: 0 !important;
+        background: rgba(26, 26, 26, 0.98) !important;
+        padding: 1rem 0 !important;
+        transform: translateY(-150%) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease !important;
+        z-index: 999 !important;
+    }
+
+    #navMenu.active {
+        transform: translateY(0) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    #navMenu .nav-link,
+    #navMenu .btn-logout {
+        display: flex !important;
+        padding: 1rem 1.5rem !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        width: 100% !important;
+    }
+}
+
+.dashboard-container {
+    overflow: visible !important;
+}
+
+.navbar.dashboard-nav {
+    overflow: visible !important;
+}
+
+.nav-container {
+    overflow: visible !important;
+}
